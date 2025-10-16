@@ -163,6 +163,9 @@ end;
 
 function Library:MakeDraggable(Instance, Cutoff)
     Instance.Active = true;
+    local dragging = false;
+    local dragStart = nil;
+    local startPos = nil;
 
     Instance.InputBegan:Connect(function(Input)
         if Input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -175,16 +178,36 @@ function Library:MakeDraggable(Instance, Cutoff)
                 return;
             end;
 
-            while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-                Instance.Position = UDim2.new(
-                    0,
-                    Mouse.X - ObjPos.X + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
-                    0,
-                    Mouse.Y - ObjPos.Y + (Instance.Size.Y.Offset * Instance.AnchorPoint.Y)
-                );
+            dragging = true;
+            dragStart = Input.Position;
+            startPos = Instance.Position;
 
-                RenderStepped:Wait();
-            end;
+            local connection;
+            connection = InputService.InputChanged:Connect(function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+                    local delta = Input.Position - dragStart;
+                    local newPosition = UDim2.new(
+                        startPos.X.Scale,
+                        startPos.X.Offset + delta.X,
+                        startPos.Y.Scale,
+                        startPos.Y.Offset + delta.Y
+                    );
+                    
+                    -- Smooth position update with tween
+                    TweenService:Create(Instance, TweenInfo.new(0.05, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                        Position = newPosition
+                    }):Play();
+                end;
+            end);
+
+            local endConnection;
+            endConnection = InputService.InputEnded:Connect(function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = false;
+                    connection:Disconnect();
+                    endConnection:Disconnect();
+                end;
+            end);
         end;
     end)
 end;
@@ -3051,37 +3074,12 @@ function Library:CreateWindow(...)
         BorderColor3 = 'OutlineColor';
     });
 
-    -- Add a subtle header to the tab area
-    local TabHeader = Library:Create('Frame', {
-        BackgroundColor3 = Library.MainColor;
-        BorderSizePixel = 0;
-        Position = UDim2.new(0, 0, 0, 0);
-        Size = UDim2.new(1, 0, 0, 25);
-        ZIndex = 2;
-        Parent = TabArea;
-    });
-
-    Library:AddToRegistry(TabHeader, {
-        BackgroundColor3 = 'MainColor';
-    });
-
-    local TabHeaderLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 8, 0, 0);
-        Size = UDim2.new(1, -16, 1, 0);
-        Text = 'Navigation';
-        TextSize = 12;
-        TextXAlignment = Enum.TextXAlignment.Left;
-        TextColor3 = Color3.fromRGB(200, 200, 200);
-        ZIndex = 3;
-        Parent = TabHeader;
-    });
-
-    -- Adjust padding to account for header
+    -- Adjust padding to remove header space
     Library:Create('UIPadding', {
-        PaddingTop = UDim.new(0, 30);
-        PaddingBottom = UDim.new(0, 8);
-        PaddingLeft = UDim.new(0, 8);
-        PaddingRight = UDim.new(0, 8);
+        PaddingTop = UDim.new(0, 0);
+        PaddingBottom = UDim.new(0, 0);
+        PaddingLeft = UDim.new(0, 0);
+        PaddingRight = UDim.new(0, 0);
         Parent = TabArea;
     });
 
@@ -3099,7 +3097,7 @@ function Library:CreateWindow(...)
     });
 
     local TabListLayout = Library:Create('UIListLayout', {
-        Padding = UDim.new(0, 2);
+        Padding = UDim.new(0, 6);
         FillDirection = Enum.FillDirection.Vertical;
         SortOrder = Enum.SortOrder.LayoutOrder;
         Parent = TabArea;
@@ -3140,19 +3138,46 @@ function Library:CreateWindow(...)
             Parent = TabArea;
         });
 
+        -- Store reference to TabButton in Tab object
+        Tab.TabButton = TabButton;
+
         Library:AddToRegistry(TabButton, {
             BackgroundColor3 = 'BackgroundColor';
             BorderColor3 = 'OutlineColor';
         });
 
+        -- Add a subtle left accent line to each tab
+        local TabAccent = Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 0, 0, 0);
+            Size = UDim2.new(0, 3, 1, 0);
+            ZIndex = 2;
+            Parent = TabButton;
+            BackgroundTransparency = 0.7;
+        });
+
+        Library:AddToRegistry(TabAccent, {
+            BackgroundColor3 = 'AccentColor';
+        });
+
         local TabButtonLabel = Library:CreateLabel({
-            Position = UDim2.new(0, 8, 0, 0);
-            Size = UDim2.new(1, -16, 1, -1);
+            Position = UDim2.new(0, 0, 0, 0);
+            Size = UDim2.new(1, 0, 1, -1);
             Text = Name;
             TextSize = 14;
             TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 1;
             Parent = TabButton;
+        });
+
+        -- Add padding to the label for internal spacing
+        Library:Create('UIPadding', {
+            PaddingTop = UDim.new(0, 0);
+            PaddingBottom = UDim.new(0, 2);
+            PaddingLeft = UDim.new(0, 8);
+            PaddingRight = UDim.new(0, 0);
+            Parent = TabButtonLabel;
         });
 
         local Blocker = Library:Create('Frame', {
@@ -3178,6 +3203,9 @@ function Library:CreateWindow(...)
             ZIndex = 2;
             Parent = TabContainer;
         });
+
+        -- Store reference to TabFrame in Tab object
+        Tab.TabFrame = TabFrame;
 
         local LeftSide = Library:Create('ScrollingFrame', {
             BackgroundTransparency = 1;
@@ -3228,9 +3256,67 @@ function Library:CreateWindow(...)
         end;
 
         function Tab:ShowTab()
-            for _, Tab in next, Window.Tabs do
-                Tab:HideTab();
+            -- Store the previously active tab for outline effect
+            local previouslyActiveTab = nil;
+            for _, OtherTab in next, Window.Tabs do
+                if OtherTab.TabFrame and OtherTab.TabFrame.Visible then
+                    previouslyActiveTab = OtherTab;
+                end;
+                OtherTab:HideTab();
             end;
+
+            -- Add outline effect to previously selected tab
+            if previouslyActiveTab and previouslyActiveTab.TabButton then
+                local prevButton = previouslyActiveTab.TabButton;
+                
+                -- Create temporary outline
+                local outlineStroke = Library:Create('UIStroke', {
+                    Color = Library.AccentColor;
+                    Thickness = 2;
+                    Transparency = 0;
+                    Parent = prevButton;
+                });
+
+                -- Fade out the outline over 1.5 seconds and destroy
+                local fadeOutTween = TweenService:Create(outlineStroke, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    Transparency = 1;
+                });
+                
+                fadeOutTween.Completed:Connect(function()
+                    if outlineStroke and outlineStroke.Parent then
+                        outlineStroke:Destroy();
+                    end;
+                end);
+                
+                fadeOutTween:Play();
+            end;
+
+            -- Add blur effect to content during transition
+            local blurEffect = Library:Create('BlurEffect', {
+                Size = 0;
+                Parent = game.Lighting;
+            });
+
+            -- Quick blur in and out effect
+            local blurInTween = TweenService:Create(blurEffect, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {
+                Size = 15;
+            });
+            
+            blurInTween.Completed:Connect(function()
+                local blurOutTween = TweenService:Create(blurEffect, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+                    Size = 0;
+                });
+                
+                blurOutTween.Completed:Connect(function()
+                    if blurEffect and blurEffect.Parent then
+                        blurEffect:Destroy();
+                    end;
+                end);
+                
+                blurOutTween:Play();
+            end);
+            
+            blurInTween:Play();
 
             Blocker.BackgroundTransparency = 0;
             TabButton.BackgroundColor3 = Library.MainColor;
