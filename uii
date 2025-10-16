@@ -3256,6 +3256,17 @@ function Library:CreateWindow(...)
         end;
 
         function Tab:ShowTab()
+            -- First, clean up any existing outlines on all tabs
+            for _, OtherTab in next, Window.Tabs do
+                if OtherTab.TabButton then
+                    for _, child in pairs(OtherTab.TabButton:GetChildren()) do
+                        if child:IsA('UIStroke') then
+                            child:Destroy();
+                        end;
+                    end;
+                end;
+            end;
+
             -- Store the previously active tab for outline effect
             local previouslyActiveTab = nil;
             for _, OtherTab in next, Window.Tabs do
@@ -3277,8 +3288,8 @@ function Library:CreateWindow(...)
                     Parent = prevButton;
                 });
 
-                -- Fade out the outline over 1.5 seconds and destroy
-                local fadeOutTween = TweenService:Create(outlineStroke, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                -- Fade out the outline over 1 second and destroy
+                local fadeOutTween = TweenService:Create(outlineStroke, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                     Transparency = 1;
                 });
                 
@@ -3329,6 +3340,13 @@ function Library:CreateWindow(...)
             TabButton.BackgroundColor3 = Library.BackgroundColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
             TabFrame.Visible = false;
+            
+            -- Clean up any existing UIStroke outlines on this tab
+            for _, child in pairs(TabButton:GetChildren()) do
+                if child:IsA('UIStroke') then
+                    child:Destroy();
+                end;
+            end;
         end;
 
         function Tab:SetLayoutOrder(Position)
