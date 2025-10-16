@@ -35,6 +35,7 @@ local Library = {
     AccentColor = Color3.fromRGB(85, 170, 85);
     OutlineColor = Color3.fromRGB(60, 60, 65);
     RiskColor = Color3.fromRGB(255, 50, 50),
+    PinkColor = Color3.fromRGB(255, 105, 180),
 
     Black = Color3.new(0, 0, 0);
     Font = Enum.Font.Arcade,
@@ -2438,6 +2439,20 @@ do
                     Parent = Button;
                 });
 
+                local RightBorder = Library:Create('Frame', {
+                    BackgroundColor3 = Library.PinkColor;
+                    BorderSizePixel = 0;
+                    Size = UDim2.new(0, 2, 1, 0);
+                    Position = UDim2.new(1, -2, 0, 0);
+                    ZIndex = 26;
+                    Visible = false;
+                    Parent = Button;
+                });
+
+                Library:AddToRegistry(RightBorder, {
+                    BackgroundColor3 = 'PinkColor';
+                });
+
                 Library:OnHighlight(Button, Button,
                     { BorderColor3 = 'AccentColor', ZIndex = 24 },
                     { BorderColor3 = 'OutlineColor', ZIndex = 23 }
@@ -2460,6 +2475,7 @@ do
 
                     ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor;
                     Library.RegistryMap[ButtonLabel].Properties.TextColor3 = Selected and 'AccentColor' or 'FontColor';
+                    RightBorder.Visible = Selected;
                 end;
 
                 ButtonLabel.InputBegan:Connect(function(Input)
@@ -3003,6 +3019,23 @@ function Library:CreateWindow(...)
         Visible = false;
         ZIndex = 1;
         Parent = ScreenGui;
+    });
+
+    -- Add glow outline behind the window
+    local GlowOutline = Library:Create('ImageLabel', {
+        Image = 'rbxassetid://18274452449';
+        ImageColor3 = Library.AccentColor;
+        ImageTransparency = 0.3;
+        BackgroundTransparency = 1;
+        AnchorPoint = Vector2.new(0.5, 0.5);
+        Position = UDim2.new(0.5, 0, 0.5, 0);
+        Size = UDim2.new(1, 40, 1, 40);
+        ZIndex = 0;
+        Parent = Outer;
+    });
+
+    Library:AddToRegistry(GlowOutline, {
+        ImageColor3 = 'AccentColor';
     });
 
     Library:MakeDraggable(Outer, 25);
