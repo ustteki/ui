@@ -2834,11 +2834,11 @@ do
 
         Groupbox:AddBlank(3);
 
-        -- Scroll Frame for Players
+        -- Scroll Frame for Players (BIGGER)
         local ScrollOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -4, 0, 300);
+            Size = UDim2.new(1, -4, 0, 450);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2968,7 +2968,7 @@ do
                 BackgroundColor3 = Library.MainColor;
                 BorderColor3 = Library.OutlineColor;
                 Name = player.Name;
-                Size = UDim2.new(1, -4, 0, 50);
+                Size = UDim2.new(1, -4, 0, 70);
                 ZIndex = 7;
                 Parent = ScrollInner;
             });
@@ -2978,12 +2978,12 @@ do
                 BorderColor3 = 'OutlineColor';
             });
 
-            -- Avatar
+            -- Avatar (Bigger)
             local Avatar = Library:Create('ImageLabel', {
                 BackgroundColor3 = Library.BackgroundColor;
                 BorderColor3 = Library.OutlineColor;
                 Position = UDim2.new(0, 5, 0, 5);
-                Size = UDim2.new(0, 40, 0, 40);
+                Size = UDim2.new(0, 60, 0, 60);
                 Image = "";
                 ZIndex = 8;
                 Parent = PlayerButton;
@@ -2994,11 +2994,11 @@ do
                 BorderColor3 = 'OutlineColor';
             });
 
-            -- Username Label
+            -- Username Label (Bigger font)
             local UsernameLabel = Library:CreateLabel({
-                Position = UDim2.new(0, 50, 0, 5);
-                Size = UDim2.new(1, -55, 0, 20);
-                TextSize = 10;
+                Position = UDim2.new(0, 72, 0, 8);
+                Size = UDim2.new(1, -145, 0, 22);
+                TextSize = 12;
                 Text = player.Name;
                 TextXAlignment = Enum.TextXAlignment.Left;
                 ZIndex = 8;
@@ -3007,9 +3007,9 @@ do
 
             -- Display Name Label
             local DisplayNameLabel = Library:CreateLabel({
-                Position = UDim2.new(0, 50, 0, 25);
-                Size = UDim2.new(1, -55, 0, 20);
-                TextSize = 9;
+                Position = UDim2.new(0, 72, 0, 32);
+                Size = UDim2.new(1, -145, 0, 18);
+                TextSize = 10;
                 Text = "@" .. player.DisplayName;
                 TextXAlignment = Enum.TextXAlignment.Left;
                 TextColor3 = Color3.fromRGB(180, 180, 180);
@@ -3017,10 +3017,55 @@ do
                 Parent = PlayerButton;
             });
 
-            -- Click button
+            -- User ID Label
+            local UserIdLabel = Library:CreateLabel({
+                Position = UDim2.new(0, 72, 0, 48);
+                Size = UDim2.new(1, -145, 0, 16);
+                TextSize = 9;
+                Text = "ID: " .. tostring(player.UserId);
+                TextXAlignment = Enum.TextXAlignment.Left;
+                TextColor3 = Color3.fromRGB(150, 150, 150);
+                ZIndex = 8;
+                Parent = PlayerButton;
+            });
+
+            -- Set Target Button (on each card)
+            local SetTargetBtn = Library:Create('TextButton', {
+                BackgroundColor3 = Library.AccentColor;
+                BorderColor3 = Library.OutlineColor;
+                Position = UDim2.new(1, -65, 0, 20);
+                Size = UDim2.new(0, 60, 0, 30);
+                Font = Library.Font;
+                Text = "🎯 Target";
+                TextColor3 = Library.FontColor;
+                TextSize = 9;
+                ZIndex = 10;
+                Parent = PlayerButton;
+            });
+
+            Library:ApplyTextStroke(SetTargetBtn);
+            Library:AddToRegistry(SetTargetBtn, {
+                BackgroundColor3 = 'AccentColor';
+                BorderColor3 = 'OutlineColor';
+                TextColor3 = 'FontColor';
+            });
+
+            SetTargetBtn.MouseButton1Click:Connect(function()
+                PlayerList.SelectedPlayer = player;
+                PlayerList:UpdatePlayerInfo(player);
+                Library:SafeCallback(PlayerList.Callback, player);
+                Library:Notify("🎯 Target set to: " .. player.Name, 2);
+            end);
+
+            Library:OnHighlight(SetTargetBtn, SetTargetBtn,
+                { BorderColor3 = 'AccentColorDark' },
+                { BorderColor3 = 'OutlineColor' }
+            );
+
+            -- Click button (for selection)
             local ClickButton = Library:Create('TextButton', {
                 BackgroundTransparency = 1;
-                Size = UDim2.new(1, 0, 1, 0);
+                Size = UDim2.new(1, -70, 1, 0);
                 Text = "";
                 ZIndex = 9;
                 Parent = PlayerButton;
