@@ -1753,11 +1753,16 @@ do
 
         Library:ApplyTextStroke(Box);
 
-        -- Prevent typing more than 1 character visually when MoreChars is false
+        -- Block typing more than 1 character when MoreChars is false
         if not Textbox.MoreChars then
+            local lastValidText = Box.Text;
             Box:GetPropertyChangedSignal('Text'):Connect(function()
                 if #Box.Text > 1 then
-                    Box.Text = Box.Text:sub(1, 1);
+                    -- Restore to the last valid text (empty or 1 char)
+                    Box.Text = lastValidText;
+                else
+                    -- Update last valid text
+                    lastValidText = Box.Text;
                 end
             end);
         end
