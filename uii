@@ -2739,6 +2739,371 @@ do
         return Depbox;
     end;
 
+    function Funcs:AddPlayerList(Idx)
+        local PlayerList = {
+            SelectedPlayer = nil;
+            Type = 'PlayerList';
+            Callback = function() end;
+        };
+
+        local Groupbox = self;
+        local Container = Groupbox.Container;
+
+        -- Title Label
+        local TitleLabel = Library:CreateLabel({
+            Size = UDim2.new(1, 0, 0, 15);
+            TextSize = 10;
+            Text = "Player List";
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 5;
+            Parent = Container;
+        });
+
+        Groupbox:AddBlank(3);
+
+        -- Buttons Container
+        local ButtonsFrame = Library:Create('Frame', {
+            BackgroundTransparency = 1;
+            Size = UDim2.new(1, -4, 0, 20);
+            ZIndex = 5;
+            Parent = Container;
+        });
+
+        -- Refresh Button
+        local RefreshButton = Library:Create('TextButton', {
+            BackgroundColor3 = Library.MainColor;
+            BorderColor3 = Library.OutlineColor;
+            Position = UDim2.new(0, 0, 0, 0);
+            Size = UDim2.new(0.48, 0, 1, 0);
+            Font = Library.Font;
+            Text = "Refresh";
+            TextColor3 = Library.FontColor;
+            TextSize = 10;
+            ZIndex = 6;
+            Parent = ButtonsFrame;
+        });
+
+        Library:ApplyTextStroke(RefreshButton);
+        Library:AddToRegistry(RefreshButton, {
+            BackgroundColor3 = 'MainColor';
+            BorderColor3 = 'OutlineColor';
+            TextColor3 = 'FontColor';
+        });
+
+        -- Teleport Button
+        local TeleportButton = Library:Create('TextButton', {
+            BackgroundColor3 = Library.MainColor;
+            BorderColor3 = Library.OutlineColor;
+            Position = UDim2.new(0.52, 0, 0, 0);
+            Size = UDim2.new(0.48, 0, 1, 0);
+            Font = Library.Font;
+            Text = "Teleport To";
+            TextColor3 = Library.FontColor;
+            TextSize = 10;
+            ZIndex = 6;
+            Parent = ButtonsFrame;
+        });
+
+        Library:ApplyTextStroke(TeleportButton);
+        Library:AddToRegistry(TeleportButton, {
+            BackgroundColor3 = 'MainColor';
+            BorderColor3 = 'OutlineColor';
+            TextColor3 = 'FontColor';
+        });
+
+        Groupbox:AddBlank(3);
+
+        -- Scroll Frame for Players
+        local ScrollOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderColor3 = Color3.new(0, 0, 0);
+            Size = UDim2.new(1, -4, 0, 300);
+            ZIndex = 5;
+            Parent = Container;
+        });
+
+        local ScrollInner = Library:Create('ScrollingFrame', {
+            BackgroundColor3 = Library.BackgroundColor;
+            BorderColor3 = Library.OutlineColor;
+            BorderMode = Enum.BorderMode.Inset;
+            Size = UDim2.new(1, 0, 1, 0);
+            CanvasSize = UDim2.new(0, 0, 0, 0);
+            ScrollBarThickness = 4;
+            ZIndex = 6;
+            Parent = ScrollOuter;
+        });
+
+        Library:AddToRegistry(ScrollInner, {
+            BackgroundColor3 = 'BackgroundColor';
+            BorderColor3 = 'OutlineColor';
+        });
+
+        local ListLayout = Library:Create('UIListLayout', {
+            Padding = UDim.new(0, 2);
+            SortOrder = Enum.SortOrder.Name;
+            Parent = ScrollInner;
+        });
+
+        ListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+            ScrollInner.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 4);
+        end);
+
+        -- Selected Player Info Display
+        Groupbox:AddBlank(5);
+        
+        local InfoLabel = Library:CreateLabel({
+            Size = UDim2.new(1, 0, 0, 15);
+            TextSize = 10;
+            Text = "Selected Player Info:";
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 5;
+            Parent = Container;
+        });
+
+        Groupbox:AddBlank(3);
+
+        local InfoFrame = Library:Create('Frame', {
+            BackgroundColor3 = Library.MainColor;
+            BorderColor3 = Library.OutlineColor;
+            Size = UDim2.new(1, -4, 0, 80);
+            ZIndex = 5;
+            Parent = Container;
+        });
+
+        Library:AddToRegistry(InfoFrame, {
+            BackgroundColor3 = 'MainColor';
+            BorderColor3 = 'OutlineColor';
+        });
+
+        -- Avatar Image in Info
+        local InfoAvatar = Library:Create('ImageLabel', {
+            BackgroundColor3 = Library.BackgroundColor;
+            BorderColor3 = Library.OutlineColor;
+            Position = UDim2.new(0, 5, 0, 5);
+            Size = UDim2.new(0, 70, 0, 70);
+            Image = "";
+            ZIndex = 6;
+            Parent = InfoFrame;
+        });
+
+        Library:AddToRegistry(InfoAvatar, {
+            BackgroundColor3 = 'BackgroundColor';
+            BorderColor3 = 'OutlineColor';
+        });
+
+        -- Info Text
+        local InfoUsername = Library:CreateLabel({
+            Position = UDim2.new(0, 80, 0, 5);
+            Size = UDim2.new(1, -85, 0, 15);
+            TextSize = 10;
+            Text = "Username: None";
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 6;
+            Parent = InfoFrame;
+        });
+
+        local InfoUserId = Library:CreateLabel({
+            Position = UDim2.new(0, 80, 0, 25);
+            Size = UDim2.new(1, -85, 0, 15);
+            TextSize = 10;
+            Text = "User ID: None";
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 6;
+            Parent = InfoFrame;
+        });
+
+        local InfoDisplayName = Library:CreateLabel({
+            Position = UDim2.new(0, 80, 0, 45);
+            Size = UDim2.new(1, -85, 0, 15);
+            TextSize = 10;
+            Text = "Display Name: None";
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 6;
+            Parent = InfoFrame;
+        });
+
+        function PlayerList:UpdatePlayerInfo(player)
+            if player then
+                PlayerList.SelectedPlayer = player;
+                InfoUsername.Text = "Username: " .. player.Name;
+                InfoUserId.Text = "User ID: " .. tostring(player.UserId);
+                InfoDisplayName.Text = "Display Name: " .. player.DisplayName;
+                
+                local thumbType = Enum.ThumbnailType.HeadShot;
+                local thumbSize = Enum.ThumbnailSize.Size150x150;
+                local content, isReady = Players:GetUserThumbnailAsync(player.UserId, thumbType, thumbSize);
+                InfoAvatar.Image = content;
+            else
+                PlayerList.SelectedPlayer = nil;
+                InfoUsername.Text = "Username: None";
+                InfoUserId.Text = "User ID: None";
+                InfoDisplayName.Text = "Display Name: None";
+                InfoAvatar.Image = "";
+            end;
+        end;
+
+        function PlayerList:CreatePlayerButton(player)
+            local PlayerButton = Library:Create('Frame', {
+                BackgroundColor3 = Library.MainColor;
+                BorderColor3 = Library.OutlineColor;
+                Name = player.Name;
+                Size = UDim2.new(1, -4, 0, 50);
+                ZIndex = 7;
+                Parent = ScrollInner;
+            });
+
+            Library:AddToRegistry(PlayerButton, {
+                BackgroundColor3 = 'MainColor';
+                BorderColor3 = 'OutlineColor';
+            });
+
+            -- Avatar
+            local Avatar = Library:Create('ImageLabel', {
+                BackgroundColor3 = Library.BackgroundColor;
+                BorderColor3 = Library.OutlineColor;
+                Position = UDim2.new(0, 5, 0, 5);
+                Size = UDim2.new(0, 40, 0, 40);
+                Image = "";
+                ZIndex = 8;
+                Parent = PlayerButton;
+            });
+
+            Library:AddToRegistry(Avatar, {
+                BackgroundColor3 = 'BackgroundColor';
+                BorderColor3 = 'OutlineColor';
+            });
+
+            -- Username Label
+            local UsernameLabel = Library:CreateLabel({
+                Position = UDim2.new(0, 50, 0, 5);
+                Size = UDim2.new(1, -55, 0, 20);
+                TextSize = 10;
+                Text = player.Name;
+                TextXAlignment = Enum.TextXAlignment.Left;
+                ZIndex = 8;
+                Parent = PlayerButton;
+            });
+
+            -- Display Name Label
+            local DisplayNameLabel = Library:CreateLabel({
+                Position = UDim2.new(0, 50, 0, 25);
+                Size = UDim2.new(1, -55, 0, 20);
+                TextSize = 9;
+                Text = "@" .. player.DisplayName;
+                TextXAlignment = Enum.TextXAlignment.Left;
+                TextColor3 = Color3.fromRGB(180, 180, 180);
+                ZIndex = 8;
+                Parent = PlayerButton;
+            });
+
+            -- Click button
+            local ClickButton = Library:Create('TextButton', {
+                BackgroundTransparency = 1;
+                Size = UDim2.new(1, 0, 1, 0);
+                Text = "";
+                ZIndex = 9;
+                Parent = PlayerButton;
+            });
+
+            ClickButton.MouseButton1Click:Connect(function()
+                PlayerList:UpdatePlayerInfo(player);
+                Library:SafeCallback(PlayerList.Callback, player);
+            end);
+
+            Library:OnHighlight(ClickButton, PlayerButton,
+                { BorderColor3 = 'AccentColor' },
+                { BorderColor3 = 'OutlineColor' }
+            );
+
+            -- Load avatar
+            task.spawn(function()
+                local success, result = pcall(function()
+                    local thumbType = Enum.ThumbnailType.HeadShot;
+                    local thumbSize = Enum.ThumbnailSize.Size150x150;
+                    return Players:GetUserThumbnailAsync(player.UserId, thumbType, thumbSize);
+                end);
+                if success then
+                    Avatar.Image = result;
+                end;
+            end);
+
+            return PlayerButton;
+        end;
+
+        function PlayerList:Refresh()
+            -- Clear existing
+            for _, child in ipairs(ScrollInner:GetChildren()) do
+                if child:IsA('Frame') then
+                    child:Destroy();
+                end;
+            end;
+
+            -- Add all players
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer then
+                    PlayerList:CreatePlayerButton(player);
+                end;
+            end;
+        end;
+
+        -- Refresh button click
+        RefreshButton.MouseButton1Click:Connect(function()
+            PlayerList:Refresh();
+            Library:Notify("Player list refreshed!", 2);
+        end);
+
+        -- Teleport button click
+        TeleportButton.MouseButton1Click:Connect(function()
+            if PlayerList.SelectedPlayer and PlayerList.SelectedPlayer.Character then
+                local targetChar = PlayerList.SelectedPlayer.Character;
+                local localChar = LocalPlayer.Character;
+                
+                if localChar and localChar:FindFirstChild("HumanoidRootPart") and targetChar:FindFirstChild("HumanoidRootPart") then
+                    localChar.HumanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame;
+                    Library:Notify("Teleported to " .. PlayerList.SelectedPlayer.Name, 2);
+                else
+                    Library:Notify("Cannot teleport - character not found", 2);
+                end;
+            else
+                Library:Notify("Please select a player first", 2);
+            end;
+        end);
+
+        Library:OnHighlight(RefreshButton, RefreshButton,
+            { BorderColor3 = 'AccentColor' },
+            { BorderColor3 = 'OutlineColor' }
+        );
+
+        Library:OnHighlight(TeleportButton, TeleportButton,
+            { BorderColor3 = 'AccentColor' },
+            { BorderColor3 = 'OutlineColor' }
+        );
+
+        -- Auto-update on player join/leave
+        Players.PlayerAdded:Connect(function(player)
+            task.wait(0.5); -- Wait for player to fully load
+            PlayerList:Refresh();
+        end);
+
+        Players.PlayerRemoving:Connect(function()
+            PlayerList:Refresh();
+        end);
+
+        -- Initial population
+        PlayerList:Refresh();
+
+        function PlayerList:OnChanged(Func)
+            PlayerList.Callback = Func;
+        end;
+
+        Groupbox:AddBlank(5);
+        Groupbox:Resize();
+
+        Options[Idx] = PlayerList;
+
+        return PlayerList;
+    end;
+
     BaseGroupbox.__index = Funcs;
     BaseGroupbox.__namecall = function(Table, Key, ...)
         return Funcs[Key](...);
@@ -3163,29 +3528,11 @@ function Library:CreateWindow(...)
         Position = UDim2.new(0.5, 0, 0.5, 0);
         Size = UDim2.new(1, -4, 1, -4);
         AnchorPoint = Vector2.new(0.5, 0.5);
-        Image = Config.Logo or '';
+        Image = Config.Logo or 'rbxassetid://131468040002901';
         ScaleType = Enum.ScaleType.Fit;
         ZIndex = 4;
         Parent = LogoBackground;
     });
-
-    -- Try to load image from GitHub URL
-    task.spawn(function()
-        if not Config.Logo or Config.Logo == '' then
-            local success, result = pcall(function()
-                return game:HttpGet('https://raw.githubusercontent.com/ustteki/ui/main/icon.png', true)
-            end)
-            
-            if success and result then
-                -- Convert to data URI or use writefile/getcustomasset if available
-                if writefile and getcustomasset then
-                    local fileName = 'uiicon.png'
-                    writefile(fileName, result)
-                    LogoImage.Image = getcustomasset(fileName)
-                end
-            end
-        end
-    end)
 
     -- Logo text (fallback if no image)
     local LogoText = Library:CreateLabel({
@@ -3340,12 +3687,7 @@ function Library:CreateWindow(...)
 
     function Window:SetLogo(AssetId)
         if LogoImage then
-            -- Check if it's a URL or an asset ID
-            if type(AssetId) == 'string' and (AssetId:match('^https?://') or AssetId:match('^rbxassetid://')) then
-                LogoImage.Image = AssetId;
-            else
-                LogoImage.Image = 'rbxassetid://' .. tostring(AssetId);
-            end
+            LogoImage.Image = 'rbxassetid://' .. tostring(AssetId);
             LogoImage.Visible = true;
             if LogoText then
                 LogoText.Visible = false;
