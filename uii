@@ -3141,25 +3141,38 @@ function Library:CreateWindow(...)
         Parent = LogoBackground;
     });
 
-    -- Logo text (first letter or custom image)
+    -- Logo image
+    local LogoImage = Library:Create('ImageLabel', {
+        BackgroundTransparency = 1;
+        Position = UDim2.new(0.5, 0, 0.5, 0);
+        Size = UDim2.new(1, -4, 1, -4);
+        AnchorPoint = Vector2.new(0.5, 0.5);
+        Image = Config.Logo or 'rbxassetid://90251589778392';
+        ScaleType = Enum.ScaleType.Fit;
+        ZIndex = 4;
+        Parent = LogoBackground;
+    });
+
+    -- Logo text (fallback if no image)
     local LogoText = Library:CreateLabel({
         Position = UDim2.new(0.5, 0, 0.5, 0);
         Size = UDim2.new(1, -10, 1, -10);
         AnchorPoint = Vector2.new(0.5, 0.5);
-        Text = string.sub(Config.Title or 'S', 1, 1);
+        Text = string.sub(Config.Title or 'O', 1, 1);
         TextSize = 22;
         TextColor3 = Color3.new(0, 0, 0);
         TextXAlignment = Enum.TextXAlignment.Center;
         TextYAlignment = Enum.TextYAlignment.Center;
         ZIndex = 4;
         Parent = LogoBackground;
+        Visible = false; -- Hidden by default when using image
     });
 
     -- Main title text
     local MainTitle = Library:CreateLabel({
         Position = UDim2.new(0, 65, 0, 14);
         Size = UDim2.new(0, 0, 0, 15);
-        Text = Config.Title or 'Script';
+        Text = Config.Title or 'Opal';
         TextSize = 14;
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 3;
@@ -3170,7 +3183,7 @@ function Library:CreateWindow(...)
     local SubTitle = Library:CreateLabel({
         Position = UDim2.new(0, 65, 0, 30);
         Size = UDim2.new(0, 0, 0, 15);
-        Text = Config.SubTitle or '';
+        Text = Config.SubTitle or 'Da Hood';
         TextSize = 14;
         TextTransparency = 0.5;
         TextXAlignment = Enum.TextXAlignment.Left;
@@ -3270,9 +3283,9 @@ function Library:CreateWindow(...)
         end;
     end;
 
-    function Window:SetSubTitle(SubTitle)
+    function Window:SetSubTitle(Text)
         if SubTitle then
-            SubTitle.Text = SubTitle;
+            SubTitle.Text = Text;
         end;
     end;
 
@@ -3288,6 +3301,26 @@ function Library:CreateWindow(...)
     function Window:SetLogoColor(Color)
         if LogoBackground then
             LogoBackground.BackgroundColor3 = Color;
+        end;
+    end;
+
+    function Window:SetLogo(AssetId)
+        if LogoImage then
+            LogoImage.Image = 'rbxassetid://' .. tostring(AssetId);
+            LogoImage.Visible = true;
+            if LogoText then
+                LogoText.Visible = false;
+            end;
+        end;
+    end;
+
+    function Window:UseTextLogo(Text)
+        if LogoText then
+            LogoText.Text = Text or string.sub(Config.Title or 'O', 1, 1);
+            LogoText.Visible = true;
+            if LogoImage then
+                LogoImage.Visible = false;
+            end;
         end;
     end;
 
