@@ -3000,7 +3000,7 @@ function Library:CreateWindow(...)
     if type(Config.MenuFadeTime) ~= 'number' then Config.MenuFadeTime = 0.2 end
 
     if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(175, 50) end
-    if typeof(Config.Size) ~= 'UDim2' then Config.Size = UDim2.fromOffset(950, 650) end
+    if typeof(Config.Size) ~= 'UDim2' then Config.Size = UDim2.fromOffset(798, 599) end
 
     if Config.Center then
         Config.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -3095,114 +3095,199 @@ function Library:CreateWindow(...)
     });
 
     local TabArea = Library:Create('Frame', {
-        BackgroundColor3 = Library.BackgroundColor;
-        BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0, 8, 0, 8);
-        Size = UDim2.new(0, 240, 1, -16);
+        BackgroundTransparency = 1;
+        Position = UDim2.new(0, 0, 0, 0);
+        Size = UDim2.new(0, 215, 1, 0);
         ZIndex = 1;
         Parent = MainSectionInner;
     });
 
-    Library:AddToRegistry(TabArea, {
+    -- Title section at top (like oldui.lua)
+    local TitleSection = Library:Create('Frame', {
+        BackgroundColor3 = Library.BackgroundColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(0, 6, 0, 6);
+        Size = UDim2.new(1, -12, 0, 60);
+        ZIndex = 2;
+        Parent = TabArea;
+    });
+
+    Library:AddToRegistry(TitleSection, {
         BackgroundColor3 = 'BackgroundColor';
         BorderColor3 = 'OutlineColor';
     });
 
-    -- Logo container at the top
-    local LogoContainer = Library:Create('Frame', {
-        BackgroundColor3 = Library.MainColor;
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 7);
+        Parent = TitleSection;
+    });
+
+    -- Logo background square
+    local LogoBackground = Library:Create('Frame', {
+        BackgroundColor3 = Color3.fromRGB(207, 207, 207);
         BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0, 0, 0, 0);
-        Size = UDim2.new(1, 0, 0, 100);
+        Position = UDim2.new(0, 12, 0.5, -20);
+        Size = UDim2.new(0, 40, 0, 40);
+        ZIndex = 3;
+        Parent = TitleSection;
+    });
+
+    Library:AddToRegistry(LogoBackground, {
+        BorderColor3 = 'OutlineColor';
+    });
+
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 7);
+        Parent = LogoBackground;
+    });
+
+    -- Logo text (first letter or custom image)
+    local LogoText = Library:CreateLabel({
+        Position = UDim2.new(0.5, 0, 0.5, 0);
+        Size = UDim2.new(1, -10, 1, -10);
+        AnchorPoint = Vector2.new(0.5, 0.5);
+        Text = string.sub(Config.Title or 'S', 1, 1);
+        TextSize = 22;
+        TextColor3 = Color3.new(0, 0, 0);
+        TextXAlignment = Enum.TextXAlignment.Center;
+        TextYAlignment = Enum.TextYAlignment.Center;
+        ZIndex = 4;
+        Parent = LogoBackground;
+    });
+
+    -- Main title text
+    local MainTitle = Library:CreateLabel({
+        Position = UDim2.new(0, 65, 0, 14);
+        Size = UDim2.new(0, 0, 0, 15);
+        Text = Config.Title or 'Script';
+        TextSize = 14;
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 3;
+        Parent = TitleSection;
+    });
+
+    -- Subtitle text
+    local SubTitle = Library:CreateLabel({
+        Position = UDim2.new(0, 65, 0, 30);
+        Size = UDim2.new(0, 0, 0, 15);
+        Text = Config.SubTitle or '';
+        TextSize = 14;
+        TextTransparency = 0.5;
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 3;
+        Parent = TitleSection;
+    });
+
+    -- Pages/Tabs container
+    local TabsContainer = Library:Create('Frame', {
+        BackgroundTransparency = 1;
+        Position = UDim2.new(0, 0, 0, 75);
+        Size = UDim2.new(1, 0, 1, -130);
+        ZIndex = 1;
+        Parent = TabArea;
+    });
+
+    Library:Create('UIPadding', {
+        PaddingLeft = UDim.new(0, 8);
+        Parent = TabsContainer;
+    });
+
+    -- Bottom info section (like oldui.lua)
+    local BottomSection = Library:Create('Frame', {
+        BackgroundColor3 = Library.BackgroundColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(0, 6, 1, -51);
+        Size = UDim2.new(1, -12, 0, 45);
         ZIndex = 2;
         Parent = TabArea;
     });
 
-    Library:AddToRegistry(LogoContainer, {
-        BackgroundColor3 = 'MainColor';
+    Library:AddToRegistry(BottomSection, {
+        BackgroundColor3 = 'BackgroundColor';
         BorderColor3 = 'OutlineColor';
     });
 
-    -- Logo image
-    local LogoImage = Library:Create('ImageLabel', {
-        BackgroundTransparency = 1;
-        Position = UDim2.new(0.5, 0, 0, 10);
-        Size = UDim2.new(0, 60, 0, 60);
-        AnchorPoint = Vector2.new(0.5, 0);
-        Image = Config.Logo or 'rbxassetid://0'; -- Default placeholder, can be set via Config.Logo
-        ScaleType = Enum.ScaleType.Fit;
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 7);
+        Parent = BottomSection;
+    });
+
+    local BottomText1 = Library:CreateLabel({
+        Position = UDim2.new(0, 10, 0, 8);
+        Size = UDim2.new(0, 0, 0, 15);
+        Text = Config.BottomText1 or 'Made with love';
+        TextSize = 12;
+        TextTransparency = 0.5;
+        TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 3;
-        Parent = LogoContainer;
+        Parent = BottomSection;
     });
 
-    -- Script title below logo
-    local ScriptTitle = Library:CreateLabel({
-        Position = UDim2.new(0, 0, 0, 75);
-        Size = UDim2.new(1, 0, 0, 20);
-        Text = Config.ScriptTitle or Config.Title or 'Script';
-        TextSize = 14;
-        TextXAlignment = Enum.TextXAlignment.Center;
+    local BottomText2 = Library:CreateLabel({
+        Position = UDim2.new(0, 10, 0, 23);
+        Size = UDim2.new(0, 0, 0, 15);
+        Text = Config.BottomText2 or 'Version 1.0';
+        TextSize = 12;
+        TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 3;
-        Parent = LogoContainer;
-    });
-
-    -- Adjust padding to account for logo header space
-    Library:Create('UIPadding', {
-        PaddingTop = UDim.new(0, 106);
-        PaddingBottom = UDim.new(0, 0);
-        PaddingLeft = UDim.new(0, 0);
-        PaddingRight = UDim.new(0, 0);
-        Parent = TabArea;
-    });
-
-    local TabSeparator = Library:Create('Frame', {
-        BackgroundColor3 = Library.OutlineColor;
-        BorderSizePixel = 0;
-        Position = UDim2.new(0, 256, 0, 8);
-        Size = UDim2.new(0, 1, 1, -16);
-        ZIndex = 1;
-        Parent = MainSectionInner;
-    });
-
-    Library:AddToRegistry(TabSeparator, {
-        BackgroundColor3 = 'OutlineColor';
+        Parent = BottomSection;
     });
 
     local TabListLayout = Library:Create('UIListLayout', {
-        Padding = UDim.new(0, 6);
+        Padding = UDim.new(0, 8);
         FillDirection = Enum.FillDirection.Vertical;
         SortOrder = Enum.SortOrder.LayoutOrder;
-        Parent = TabArea;
+        Parent = TabsContainer;
     });
 
     local TabContainer = Library:Create('Frame', {
-        BackgroundColor3 = Library.MainColor;
+        BackgroundColor3 = Library.BackgroundColor;
         BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0, 264, 0, 8);
-        Size = UDim2.new(1, -272, 1, -16);
+        Position = UDim2.new(0, 220, 0, 6);
+        Size = UDim2.new(1, -226, 1, -12);
         ZIndex = 2;
         Parent = MainSectionInner;
     });
     
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 7);
+        Parent = TabContainer;
+    });
+    
 
     Library:AddToRegistry(TabContainer, {
-        BackgroundColor3 = 'MainColor';
+        BackgroundColor3 = 'BackgroundColor';
         BorderColor3 = 'OutlineColor';
     });
 
     function Window:SetWindowTitle(Title)
         WindowLabel.Text = Title;
-    end;
-
-    function Window:SetLogo(AssetId)
-        if LogoImage then
-            LogoImage.Image = 'rbxassetid://' .. tostring(AssetId);
+        if MainTitle then
+            MainTitle.Text = Title;
+        end;
+        if LogoText then
+            LogoText.Text = string.sub(Title, 1, 1);
         end;
     end;
 
-    function Window:SetScriptTitle(Title)
-        if ScriptTitle then
-            ScriptTitle.Text = Title;
+    function Window:SetSubTitle(SubTitle)
+        if SubTitle then
+            SubTitle.Text = SubTitle;
+        end;
+    end;
+
+    function Window:SetBottomText(Text1, Text2)
+        if BottomText1 and Text1 then
+            BottomText1.Text = Text1;
+        end;
+        if BottomText2 and Text2 then
+            BottomText2.Text = Text2;
+        end;
+    end;
+
+    function Window:SetLogoColor(Color)
+        if LogoBackground then
+            LogoBackground.BackgroundColor3 = Color;
         end;
     end;
 
@@ -3219,7 +3304,12 @@ function Library:CreateWindow(...)
             BorderColor3 = Library.OutlineColor;
             Size = UDim2.new(1, 0, 0, 35);
             ZIndex = 1;
-            Parent = TabArea;
+            Parent = TabsContainer;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 7);
+            Parent = TabButton;
         });
 
         -- Store reference to TabButton in Tab object
@@ -3239,6 +3329,11 @@ function Library:CreateWindow(...)
             ZIndex = 2;
             Parent = TabButton;
             BackgroundTransparency = 0.7;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 7);
+            Parent = TabAccent;
         });
 
         Library:AddToRegistry(TabAccent, {
