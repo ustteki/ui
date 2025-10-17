@@ -535,7 +535,7 @@ do
             BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 1, 0);
             ZIndex = 18;
-            Image = 'rbxassetid://4155801252';
+            Image = 'rbxassetid://131468040002901';
             Parent = SatVibMapInner;
         });
 
@@ -1661,6 +1661,7 @@ do
             Value = Info.Default or '';
             Numeric = Info.Numeric or false;
             Finished = Info.Finished or false;
+            MoreChars = Info.MoreChars ~= false; -- Default to true if not specified
             Type = 'Input';
             Callback = Info.Callback or function(Value) end;
         };
@@ -1753,6 +1754,11 @@ do
         Library:ApplyTextStroke(Box);
 
         function Textbox:SetValue(Text)
+            -- Limit to 1 character if MoreChars is false
+            if not Textbox.MoreChars and #Text > 1 then
+                Text = Text:sub(1, 1);
+            end;
+
             if Info.MaxLength and #Text > Info.MaxLength then
                 Text = Text:sub(1, Info.MaxLength);
             end;
@@ -3148,7 +3154,7 @@ function Library:CreateWindow(...)
         Position = UDim2.new(0.5, 0, 0.5, 0);
         Size = UDim2.new(1, -4, 1, -4);
         AnchorPoint = Vector2.new(0.5, 0.5);
-        Image = Config.Logo or 'rbxassetid://90251589778392';
+        Image = Config.Logo or 'rbxassetid://131468040002901';
         ScaleType = Enum.ScaleType.Fit;
         ZIndex = 4;
         Parent = LogoBackground;
