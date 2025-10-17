@@ -1746,6 +1746,7 @@ do
             TextSize = 10;
             TextStrokeTransparency = 0;
             TextXAlignment = Enum.TextXAlignment.Left;
+            MaxLength = Textbox.MoreChars and 0 or 1; -- 0 = unlimited, 1 = single char limit
 
             ZIndex = 7;
             Parent = Container;
@@ -1753,16 +1754,13 @@ do
 
         Library:ApplyTextStroke(Box);
 
-        -- Block typing more than 1 character when MoreChars is false
+        -- Auto-unfocus after typing 1 character when MoreChars is false
         if not Textbox.MoreChars then
-            local lastValidText = Box.Text;
             Box:GetPropertyChangedSignal('Text'):Connect(function()
-                if #Box.Text > 1 then
-                    -- Restore to the last valid text (empty or 1 char)
-                    Box.Text = lastValidText;
-                else
-                    -- Update last valid text
-                    lastValidText = Box.Text;
+                if #Box.Text == 1 then
+                    -- Automatically unfocus after entering 1 character
+                    task.wait()
+                    Box:ReleaseFocus(true);
                 end
             end);
         end
