@@ -1753,6 +1753,15 @@ do
 
         Library:ApplyTextStroke(Box);
 
+        -- Prevent typing more than 1 character visually when MoreChars is false
+        if not Textbox.MoreChars then
+            Box:GetPropertyChangedSignal('Text'):Connect(function()
+                if #Box.Text > 1 then
+                    Box.Text = Box.Text:sub(1, 1);
+                end
+            end);
+        end
+
         function Textbox:SetValue(Text)
             -- Limit to 1 character if MoreChars is false
             if not Textbox.MoreChars and #Text > 1 then
