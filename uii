@@ -2761,7 +2761,7 @@ do
 
         Groupbox:AddBlank(3);
 
-        -- Buttons Container
+        -- Buttons Container (First Row)
         local ButtonsFrame = Library:Create('Frame', {
             BackgroundTransparency = 1;
             Size = UDim2.new(1, -4, 0, 20);
@@ -2774,7 +2774,7 @@ do
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
             Position = UDim2.new(0, 0, 0, 0);
-            Size = UDim2.new(0.48, 0, 1, 0);
+            Size = UDim2.new(1, 0, 1, 0);
             Font = Library.Font;
             Text = "Refresh";
             TextColor3 = Library.FontColor;
@@ -2790,22 +2790,53 @@ do
             TextColor3 = 'FontColor';
         });
 
+        Groupbox:AddBlank(3);
+
+        -- Buttons Container (Second Row)
+        local ButtonsFrame2 = Library:Create('Frame', {
+            BackgroundTransparency = 1;
+            Size = UDim2.new(1, -4, 0, 20);
+            ZIndex = 5;
+            Parent = Container;
+        });
+
         -- Teleport Button
         local TeleportButton = Library:Create('TextButton', {
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
-            Position = UDim2.new(0.52, 0, 0, 0);
+            Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(0.48, 0, 1, 0);
             Font = Library.Font;
             Text = "Teleport To";
             TextColor3 = Library.FontColor;
             TextSize = 10;
             ZIndex = 6;
-            Parent = ButtonsFrame;
+            Parent = ButtonsFrame2;
         });
 
         Library:ApplyTextStroke(TeleportButton);
         Library:AddToRegistry(TeleportButton, {
+            BackgroundColor3 = 'MainColor';
+            BorderColor3 = 'OutlineColor';
+            TextColor3 = 'FontColor';
+        });
+
+        -- Set Target Button
+        local SetTargetButton = Library:Create('TextButton', {
+            BackgroundColor3 = Library.MainColor;
+            BorderColor3 = Library.OutlineColor;
+            Position = UDim2.new(0.52, 0, 0, 0);
+            Size = UDim2.new(0.48, 0, 1, 0);
+            Font = Library.Font;
+            Text = "Set Target";
+            TextColor3 = Library.FontColor;
+            TextSize = 10;
+            ZIndex = 6;
+            Parent = ButtonsFrame2;
+        });
+
+        Library:ApplyTextStroke(SetTargetButton);
+        Library:AddToRegistry(SetTargetButton, {
             BackgroundColor3 = 'MainColor';
             BorderColor3 = 'OutlineColor';
             TextColor3 = 'FontColor';
@@ -3069,12 +3100,31 @@ do
             end;
         end);
 
+        -- Set Target button click
+        SetTargetButton.MouseButton1Click:Connect(function()
+            if PlayerList.SelectedPlayer then
+                if getgenv().TargetAim then
+                    getgenv().TargetAim.SelectedPlayerName = PlayerList.SelectedPlayer.Name;
+                    Library:Notify("Target set to: " .. PlayerList.SelectedPlayer.Name, 2);
+                else
+                    Library:Notify("Target Aim not initialized", 2);
+                end;
+            else
+                Library:Notify("Please select a player first", 2);
+            end;
+        end);
+
         Library:OnHighlight(RefreshButton, RefreshButton,
             { BorderColor3 = 'AccentColor' },
             { BorderColor3 = 'OutlineColor' }
         );
 
         Library:OnHighlight(TeleportButton, TeleportButton,
+            { BorderColor3 = 'AccentColor' },
+            { BorderColor3 = 'OutlineColor' }
+        );
+
+        Library:OnHighlight(SetTargetButton, SetTargetButton,
             { BorderColor3 = 'AccentColor' },
             { BorderColor3 = 'OutlineColor' }
         );
