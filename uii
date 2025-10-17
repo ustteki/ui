@@ -3163,7 +3163,7 @@ function Library:CreateWindow(...)
         Position = UDim2.new(0.5, 0, 0.5, 0);
         Size = UDim2.new(1, -4, 1, -4);
         AnchorPoint = Vector2.new(0.5, 0.5);
-        Image = Config.Logo or 'rbxassetid://131468040002901';
+        Image = Config.Logo or 'https://raw.githubusercontent.com/ustteki/ui/main/icon.png';
         ScaleType = Enum.ScaleType.Fit;
         ZIndex = 4;
         Parent = LogoBackground;
@@ -3322,7 +3322,12 @@ function Library:CreateWindow(...)
 
     function Window:SetLogo(AssetId)
         if LogoImage then
-            LogoImage.Image = 'rbxassetid://' .. tostring(AssetId);
+            -- Check if it's a URL or an asset ID
+            if type(AssetId) == 'string' and (AssetId:match('^https?://') or AssetId:match('^rbxassetid://')) then
+                LogoImage.Image = AssetId;
+            else
+                LogoImage.Image = 'rbxassetid://' .. tostring(AssetId);
+            end
             LogoImage.Visible = true;
             if LogoText then
                 LogoText.Visible = false;
