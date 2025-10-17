@@ -3364,6 +3364,518 @@ function Library:Notify(Text, Time)
     end);
 end;
 
+function Library:CreatePlayerListWindow()
+    local PlayerListWindow = {
+        SelectedPlayer = nil;
+        OnSelectTarget = function() end;
+    };
+
+    -- Main Window Frame
+    local WindowOuter = Library:Create('Frame', {
+        AnchorPoint = Vector2.new(0, 0);
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BorderColor3 = Color3.new(0, 0, 0);
+        Position = UDim2.fromOffset(900, 50);
+        Size = UDim2.fromOffset(500, 650);
+        ZIndex = 50;
+        Visible = false;
+        Parent = ScreenGui;
+    });
+
+    Library:MakeDraggable(WindowOuter, 30);
+
+    local WindowInner = Library:Create('Frame', {
+        BackgroundColor3 = Library.BackgroundColor;
+        BorderColor3 = Library.AccentColor;
+        BorderMode = Enum.BorderMode.Inset;
+        Size = UDim2.new(1, 0, 1, 0);
+        ZIndex = 51;
+        Parent = WindowOuter;
+    });
+
+    Library:AddToRegistry(WindowInner, {
+        BackgroundColor3 = 'BackgroundColor';
+        BorderColor3 = 'AccentColor';
+    });
+
+    -- Title Bar
+    local TitleBar = Library:Create('Frame', {
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.OutlineColor;
+        Size = UDim2.new(1, 0, 0, 30);
+        ZIndex = 52;
+        Parent = WindowInner;
+    });
+
+    Library:AddToRegistry(TitleBar, {
+        BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'OutlineColor';
+    });
+
+    local TitleLabel = Library:CreateLabel({
+        Position = UDim2.new(0, 10, 0, 7);
+        Size = UDim2.new(1, -40, 1, -14);
+        TextSize = 14;
+        Text = "🎮 Player List Manager";
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 53;
+        Parent = TitleBar;
+    });
+
+    -- Close Button
+    local CloseButton = Library:Create('TextButton', {
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(1, -25, 0, 5);
+        Size = UDim2.new(0, 20, 0, 20);
+        Font = Library.Font;
+        Text = "X";
+        TextColor3 = Library.FontColor;
+        TextSize = 12;
+        ZIndex = 53;
+        Parent = TitleBar;
+    });
+
+    Library:ApplyTextStroke(CloseButton);
+    Library:AddToRegistry(CloseButton, {
+        BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'OutlineColor';
+        TextColor3 = 'FontColor';
+    });
+
+    Library:OnHighlight(CloseButton, CloseButton,
+        { BorderColor3 = 'AccentColor' },
+        { BorderColor3 = 'OutlineColor' }
+    );
+
+    CloseButton.MouseButton1Click:Connect(function()
+        WindowOuter.Visible = false;
+        Library.OpenedFrames[WindowOuter] = nil;
+    end);
+
+    -- Content Area
+    local ContentFrame = Library:Create('Frame', {
+        BackgroundTransparency = 1;
+        Position = UDim2.new(0, 10, 0, 40);
+        Size = UDim2.new(1, -20, 1, -50);
+        ZIndex = 52;
+        Parent = WindowInner;
+    });
+
+    -- Action Buttons Row
+    local ButtonsFrame = Library:Create('Frame', {
+        BackgroundTransparency = 1;
+        Size = UDim2.new(1, 0, 0, 30);
+        ZIndex = 52;
+        Parent = ContentFrame;
+    });
+
+    -- Refresh Button
+    local RefreshButton = Library:Create('TextButton', {
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(0, 0, 0, 0);
+        Size = UDim2.new(0.32, -5, 1, 0);
+        Font = Library.Font;
+        Text = "🔄 Refresh",
+        TextColor3 = Library.FontColor;
+        TextSize = 11;
+        ZIndex = 53;
+        Parent = ButtonsFrame;
+    });
+
+    Library:ApplyTextStroke(RefreshButton);
+    Library:AddToRegistry(RefreshButton, {
+        BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'OutlineColor';
+        TextColor3 = 'FontColor';
+    });
+
+    -- Teleport Button
+    local TeleportButton = Library:Create('TextButton', {
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(0.34, 0, 0, 0);
+        Size = UDim2.new(0.32, -5, 1, 0);
+        Font = Library.Font;
+        Text = "🚀 Teleport",
+        TextColor3 = Library.FontColor;
+        TextSize = 11;
+        ZIndex = 53;
+        Parent = ButtonsFrame;
+    });
+
+    Library:ApplyTextStroke(TeleportButton);
+    Library:AddToRegistry(TeleportButton, {
+        BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'OutlineColor';
+        TextColor3 = 'FontColor';
+    });
+
+    -- Select Target Button
+    local SelectTargetButton = Library:Create('TextButton', {
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(0.68, 0, 0, 0);
+        Size = UDim2.new(0.32, 0, 1, 0);
+        Font = Library.Font;
+        Text = "🎯 Set Target",
+        TextColor3 = Library.FontColor;
+        TextSize = 11;
+        ZIndex = 53;
+        Parent = ButtonsFrame;
+    });
+
+    Library:ApplyTextStroke(SelectTargetButton);
+    Library:AddToRegistry(SelectTargetButton, {
+        BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'OutlineColor';
+        TextColor3 = 'FontColor';
+    });
+
+    -- Player List Scroll Frame
+    local ScrollOuter = Library:Create('Frame', {
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BorderColor3 = Color3.new(0, 0, 0);
+        Position = UDim2.new(0, 0, 0, 40);
+        Size = UDim2.new(1, 0, 0, 380);
+        ZIndex = 52;
+        Parent = ContentFrame;
+    });
+
+    local ScrollInner = Library:Create('ScrollingFrame', {
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.OutlineColor;
+        BorderMode = Enum.BorderMode.Inset;
+        Size = UDim2.new(1, 0, 1, 0);
+        CanvasSize = UDim2.new(0, 0, 0, 0);
+        ScrollBarThickness = 6;
+        ZIndex = 53;
+        Parent = ScrollOuter;
+    });
+
+    Library:AddToRegistry(ScrollInner, {
+        BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'OutlineColor';
+    });
+
+    local ListLayout = Library:Create('UIListLayout', {
+        Padding = UDim.new(0, 3);
+        SortOrder = Enum.SortOrder.Name;
+        Parent = ScrollInner;
+    });
+
+    ListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+        ScrollInner.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 6);
+    end);
+
+    -- Selected Player Info Section
+    local InfoSection = Library:Create('Frame', {
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(0, 0, 0, 430);
+        Size = UDim2.new(1, 0, 0, 160);
+        ZIndex = 52;
+        Parent = ContentFrame;
+    });
+
+    Library:AddToRegistry(InfoSection, {
+        BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'OutlineColor';
+    });
+
+    local InfoTitleLabel = Library:CreateLabel({
+        Position = UDim2.new(0, 5, 0, 5);
+        Size = UDim2.new(1, -10, 0, 20);
+        TextSize = 12;
+        Text = "📋 Selected Player Information";
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 53;
+        Parent = InfoSection;
+    });
+
+    -- Avatar Image
+    local InfoAvatar = Library:Create('ImageLabel', {
+        BackgroundColor3 = Library.BackgroundColor;
+        BorderColor3 = Library.OutlineColor;
+        Position = UDim2.new(0, 10, 0, 35);
+        Size = UDim2.new(0, 110, 0, 110);
+        Image = "";
+        ZIndex = 53;
+        Parent = InfoSection;
+    });
+
+    Library:AddToRegistry(InfoAvatar, {
+        BackgroundColor3 = 'BackgroundColor';
+        BorderColor3 = 'OutlineColor';
+    });
+
+    -- Info Labels
+    local InfoUsername = Library:CreateLabel({
+        Position = UDim2.new(0, 130, 0, 35);
+        Size = UDim2.new(1, -140, 0, 20);
+        TextSize = 11;
+        Text = "👤 Username: None";
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 53;
+        Parent = InfoSection;
+    });
+
+    local InfoDisplayName = Library:CreateLabel({
+        Position = UDim2.new(0, 130, 0, 60);
+        Size = UDim2.new(1, -140, 0, 20);
+        TextSize = 11;
+        Text = "📛 Display Name: None";
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 53;
+        Parent = InfoSection;
+    });
+
+    local InfoUserId = Library:CreateLabel({
+        Position = UDim2.new(0, 130, 0, 85);
+        Size = UDim2.new(1, -140, 0, 20);
+        TextSize = 11;
+        Text = "🆔 User ID: None";
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 53;
+        Parent = InfoSection;
+    });
+
+    local InfoTeam = Library:CreateLabel({
+        Position = UDim2.new(0, 130, 0, 110);
+        Size = UDim2.new(1, -140, 0, 20);
+        TextSize = 11;
+        Text = "⚔️ Team: None";
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 53;
+        Parent = InfoSection;
+    });
+
+    function PlayerListWindow:UpdatePlayerInfo(player)
+        if player then
+            PlayerListWindow.SelectedPlayer = player;
+            InfoUsername.Text = "👤 Username: " .. player.Name;
+            InfoDisplayName.Text = "📛 Display Name: " .. player.DisplayName;
+            InfoUserId.Text = "🆔 User ID: " .. tostring(player.UserId);
+            InfoTeam.Text = "⚔️ Team: " .. (player.Team and player.Team.Name or "None");
+            
+            task.spawn(function()
+                local success, content = pcall(function()
+                    return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150);
+                end);
+                if success then
+                    InfoAvatar.Image = content;
+                end;
+            end);
+        else
+            PlayerListWindow.SelectedPlayer = nil;
+            InfoUsername.Text = "👤 Username: None";
+            InfoDisplayName.Text = "📛 Display Name: None";
+            InfoUserId.Text = "🆔 User ID: None";
+            InfoTeam.Text = "⚔️ Team: None";
+            InfoAvatar.Image = "";
+        end;
+    end;
+
+    function PlayerListWindow:CreatePlayerButton(player)
+        local PlayerButton = Library:Create('Frame', {
+            BackgroundColor3 = Library.BackgroundColor;
+            BorderColor3 = Library.OutlineColor;
+            Name = player.Name;
+            Size = UDim2.new(1, -6, 0, 65);
+            ZIndex = 54;
+            Parent = ScrollInner;
+        });
+
+        Library:AddToRegistry(PlayerButton, {
+            BackgroundColor3 = 'BackgroundColor';
+            BorderColor3 = 'OutlineColor';
+        });
+
+        -- Avatar (larger for big dropdown)
+        local Avatar = Library:Create('ImageLabel', {
+            BackgroundColor3 = Library.MainColor;
+            BorderColor3 = Library.OutlineColor;
+            Position = UDim2.new(0, 5, 0, 5);
+            Size = UDim2.new(0, 55, 0, 55);
+            Image = "";
+            ZIndex = 55;
+            Parent = PlayerButton;
+        });
+
+        Library:AddToRegistry(Avatar, {
+            BackgroundColor3 = 'MainColor';
+            BorderColor3 = 'OutlineColor';
+        });
+
+        -- Username Label (bigger font)
+        local UsernameLabel = Library:CreateLabel({
+            Position = UDim2.new(0, 68, 0, 8);
+            Size = UDim2.new(1, -75, 0, 20);
+            TextSize = 12;
+            Text = player.Name;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 55;
+            Parent = PlayerButton;
+        });
+
+        -- Display Name Label
+        local DisplayNameLabel = Library:CreateLabel({
+            Position = UDim2.new(0, 68, 0, 28);
+            Size = UDim2.new(1, -75, 0, 18);
+            TextSize = 10;
+            Text = "@" .. player.DisplayName;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            TextColor3 = Color3.fromRGB(180, 180, 180);
+            ZIndex = 55;
+            Parent = PlayerButton;
+        });
+
+        -- Team/Status Label
+        local TeamLabel = Library:CreateLabel({
+            Position = UDim2.new(0, 68, 0, 46);
+            Size = UDim2.new(1, -75, 0, 15);
+            TextSize = 9;
+            Text = "Team: " .. (player.Team and player.Team.Name or "None");
+            TextXAlignment = Enum.TextXAlignment.Left;
+            TextColor3 = Color3.fromRGB(150, 150, 150);
+            ZIndex = 55;
+            Parent = PlayerButton;
+        });
+
+        -- Click button
+        local ClickButton = Library:Create('TextButton', {
+            BackgroundTransparency = 1;
+            Size = UDim2.new(1, 0, 1, 0);
+            Text = "";
+            ZIndex = 56;
+            Parent = PlayerButton;
+        });
+
+        ClickButton.MouseButton1Click:Connect(function()
+            PlayerListWindow:UpdatePlayerInfo(player);
+        end);
+
+        Library:OnHighlight(ClickButton, PlayerButton,
+            { BorderColor3 = 'AccentColor', BackgroundColor3 = 'MainColor' },
+            { BorderColor3 = 'OutlineColor', BackgroundColor3 = 'BackgroundColor' }
+        );
+
+        -- Load avatar
+        task.spawn(function()
+            local success, content = pcall(function()
+                return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150);
+            end);
+            if success then
+                Avatar.Image = content;
+            end;
+        end);
+
+        return PlayerButton;
+    end;
+
+    function PlayerListWindow:Refresh()
+        -- Clear existing
+        for _, child in ipairs(ScrollInner:GetChildren()) do
+            if child:IsA('Frame') then
+                child:Destroy();
+            end;
+        end;
+
+        -- Add all players
+        local count = 0;
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                PlayerListWindow:CreatePlayerButton(player);
+                count = count + 1;
+            end;
+        end;
+
+        Library:Notify(string.format("Found %d players", count), 2);
+    end;
+
+    function PlayerListWindow:Show()
+        WindowOuter.Visible = true;
+        Library.OpenedFrames[WindowOuter] = true;
+        PlayerListWindow:Refresh();
+    end;
+
+    function PlayerListWindow:Hide()
+        WindowOuter.Visible = false;
+        Library.OpenedFrames[WindowOuter] = nil;
+    end;
+
+    function PlayerListWindow:Toggle()
+        if WindowOuter.Visible then
+            PlayerListWindow:Hide();
+        else
+            PlayerListWindow:Show();
+        end;
+    end;
+
+    -- Button Handlers
+    RefreshButton.MouseButton1Click:Connect(function()
+        PlayerListWindow:Refresh();
+    end);
+
+    TeleportButton.MouseButton1Click:Connect(function()
+        if PlayerListWindow.SelectedPlayer and PlayerListWindow.SelectedPlayer.Character then
+            local targetChar = PlayerListWindow.SelectedPlayer.Character;
+            local localChar = LocalPlayer.Character;
+            
+            if localChar and localChar:FindFirstChild("HumanoidRootPart") and targetChar:FindFirstChild("HumanoidRootPart") then
+                localChar.HumanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame;
+                Library:Notify("🚀 Teleported to " .. PlayerListWindow.SelectedPlayer.Name, 2);
+            else
+                Library:Notify("❌ Cannot teleport - character not found", 2);
+            end;
+        else
+            Library:Notify("⚠️ Please select a player first", 2);
+        end;
+    end);
+
+    SelectTargetButton.MouseButton1Click:Connect(function()
+        if PlayerListWindow.SelectedPlayer then
+            Library:SafeCallback(PlayerListWindow.OnSelectTarget, PlayerListWindow.SelectedPlayer);
+            Library:Notify("🎯 Target set to: " .. PlayerListWindow.SelectedPlayer.Name, 2);
+        else
+            Library:Notify("⚠️ Please select a player first", 2);
+        end;
+    end);
+
+    Library:OnHighlight(RefreshButton, RefreshButton,
+        { BorderColor3 = 'AccentColor' },
+        { BorderColor3 = 'OutlineColor' }
+    );
+
+    Library:OnHighlight(TeleportButton, TeleportButton,
+        { BorderColor3 = 'AccentColor' },
+        { BorderColor3 = 'OutlineColor' }
+    );
+
+    Library:OnHighlight(SelectTargetButton, SelectTargetButton,
+        { BorderColor3 = 'AccentColor' },
+        { BorderColor3 = 'OutlineColor' }
+    );
+
+    -- Auto-update on player join/leave
+    Players.PlayerAdded:Connect(function(player)
+        if WindowOuter.Visible then
+            task.wait(0.5);
+            PlayerListWindow:Refresh();
+        end;
+    end);
+
+    Players.PlayerRemoving:Connect(function()
+        if WindowOuter.Visible then
+            PlayerListWindow:Refresh();
+        end;
+    end);
+
+    Library.PlayerListWindow = PlayerListWindow;
+    return PlayerListWindow;
+end;
+
 function Library:CreateWindow(...)
     local Arguments = { ... }
     local Config = { AnchorPoint = Vector2.zero }
