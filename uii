@@ -3478,97 +3478,35 @@ function Library:CreateWindow(...)
         end;
 
         function Tab:ShowTab()
-            -- First, clean up any existing outlines on all tabs
+            -- Hide all other tabs first
             for _, OtherTab in next, Window.Tabs do
-                if OtherTab.TabButton then
-                    for _, child in pairs(OtherTab.TabButton:GetChildren()) do
-                        if child:IsA('UIStroke') then
-                            child:Destroy();
-                        end;
-                    end;
+                if OtherTab ~= Tab then
+                    OtherTab:HideTab();
                 end;
             end;
 
-            -- Store the previously active tab for outline effect
-            local previouslyActiveTab = nil;
-            for _, OtherTab in next, Window.Tabs do
-                if OtherTab.TabFrame and OtherTab.TabFrame.Visible then
-                    previouslyActiveTab = OtherTab;
-                end;
-                OtherTab:HideTab();
-            end;
-
-            -- Add outline effect to previously selected tab
-            if previouslyActiveTab and previouslyActiveTab.TabButton then
-                local prevButton = previouslyActiveTab.TabButton;
-                
-                -- Create temporary outline
-                local outlineStroke = Library:Create('UIStroke', {
-                    Color = Library.AccentColor;
-                    Thickness = 2;
-                    Transparency = 0;
-                    Parent = prevButton;
-                });
-
-                -- Fade out the outline over 1 second and destroy
-                local fadeOutTween = TweenService:Create(outlineStroke, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    Transparency = 1;
-                });
-                
-                fadeOutTween.Completed:Connect(function()
-                    if outlineStroke and outlineStroke.Parent then
-                        outlineStroke:Destroy();
-                    end;
-                end);
-                
-                fadeOutTween:Play();
-            end;
-
-            -- Add blur effect to content during transition
-            local blurEffect = Library:Create('BlurEffect', {
-                Size = 0;
-                Parent = game.Lighting;
-            });
-
-            -- Quick blur in and out effect
-            local blurInTween = TweenService:Create(blurEffect, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {
-                Size = 15;
-            });
-            
-            blurInTween.Completed:Connect(function()
-                local blurOutTween = TweenService:Create(blurEffect, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
-                    Size = 0;
-                });
-                
-                blurOutTween.Completed:Connect(function()
-                    if blurEffect and blurEffect.Parent then
-                        blurEffect:Destroy();
-                    end;
-                end);
-                
-                blurOutTween:Play();
-            end);
-            
-            blurInTween:Play();
-
+            -- Show this tab
             Blocker.BackgroundTransparency = 0;
+            
+            -- Safely update background color
             TabButton.BackgroundColor3 = Library.MainColor;
-            Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
+            if Library.RegistryMap[TabButton] then
+                Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
+            end;
+            
             TabFrame.Visible = true;
         end;
 
         function Tab:HideTab()
             Blocker.BackgroundTransparency = 1;
-            TabButton.BackgroundColor3 = Library.BackgroundColor;
-            Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
-            TabFrame.Visible = false;
             
-            -- Clean up any existing UIStroke outlines on this tab
-            for _, child in pairs(TabButton:GetChildren()) do
-                if child:IsA('UIStroke') then
-                    child:Destroy();
-                end;
+            -- Safely update background color
+            TabButton.BackgroundColor3 = Library.BackgroundColor;
+            if Library.RegistryMap[TabButton] then
+                Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
             end;
+            
+            TabFrame.Visible = false;
         end;
 
         function Tab:SetLayoutOrder(Position)
@@ -3878,19 +3816,25 @@ function Library:CreateWindow(...)
         end);
 
         TabButtonClickable.MouseEnter:Connect(function()
-            if TabFrame.Visible == false then
-                TweenService:Create(TabButton, TweenInfo.new(0.15), {
-                    BackgroundColor3 = Color3.fromRGB(50, 50, 55);
-                    BorderColor3 = Library.AccentColor;
+            if not TabFrame.Visible then
+                TweenService:Create(TabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    BackgroundColor3 = Color3.fromRGB(40, 45, 45);
+                }):Play();
+                
+                TweenService:Create(TabAccent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    BackgroundTransparency = 0.3;
                 }):Play();
             end;
         end);
 
         TabButtonClickable.MouseLeave:Connect(function()
-            if TabFrame.Visible == false then
-                TweenService:Create(TabButton, TweenInfo.new(0.15), {
+            if not TabFrame.Visible then
+                TweenService:Create(TabButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                     BackgroundColor3 = Library.BackgroundColor;
-                    BorderColor3 = Library.OutlineColor;
+                }):Play();
+                
+                TweenService:Create(TabAccent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    BackgroundTransparency = 0.7;
                 }):Play();
             end;
         end);
