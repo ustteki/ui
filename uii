@@ -1753,6 +1753,15 @@ do
 
         Library:ApplyTextStroke(Box);
 
+        -- Prevent typing more than 1 character visually when MoreChars is false
+        if not Textbox.MoreChars then
+            Box:GetPropertyChangedSignal('Text'):Connect(function()
+                if #Box.Text > 1 then
+                    Box.Text = Box.Text:sub(1, 1);
+                end
+            end);
+        end
+
         function Textbox:SetValue(Text)
             -- Limit to 1 character if MoreChars is false
             if not Textbox.MoreChars and #Text > 1 then
@@ -1775,19 +1784,6 @@ do
             Library:SafeCallback(Textbox.Callback, Textbox.Value);
             Library:SafeCallback(Textbox.Changed, Textbox.Value);
         end;
-
-        -- Block input after first character when MoreChars is false
-        if not Textbox.MoreChars then
-            Box:GetPropertyChangedSignal('Text'):Connect(function()
-                if #Box.Text > 1 then
-                    -- Truncate to first character
-                    local newText = Box.Text:sub(1, 1);
-                    if Box.Text ~= newText then
-                        Box.Text = newText;
-                    end
-                end
-            end);
-        end
 
         if Textbox.Finished then
             Box.FocusLost:Connect(function(enter)
