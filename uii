@@ -3163,11 +3163,29 @@ function Library:CreateWindow(...)
         Position = UDim2.new(0.5, 0, 0.5, 0);
         Size = UDim2.new(1, -4, 1, -4);
         AnchorPoint = Vector2.new(0.5, 0.5);
-        Image = Config.Logo or 'https://raw.githubusercontent.com/ustteki/ui/main/icon.png';
+        Image = Config.Logo or '';
         ScaleType = Enum.ScaleType.Fit;
         ZIndex = 4;
         Parent = LogoBackground;
     });
+
+    -- Try to load image from GitHub URL
+    task.spawn(function()
+        if not Config.Logo or Config.Logo == '' then
+            local success, result = pcall(function()
+                return game:HttpGet('https://raw.githubusercontent.com/ustteki/ui/main/icon.png', true)
+            end)
+            
+            if success and result then
+                -- Convert to data URI or use writefile/getcustomasset if available
+                if writefile and getcustomasset then
+                    local fileName = 'uiicon.png'
+                    writefile(fileName, result)
+                    LogoImage.Image = getcustomasset(fileName)
+                end
+            end
+        end
+    end)
 
     -- Logo text (fallback if no image)
     local LogoText = Library:CreateLabel({
