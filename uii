@@ -31,10 +31,10 @@ local Library = {
     HudRegistry = {};
 
     FontColor = Color3.fromRGB(255, 255, 255);
-    MainColor = Color3.fromRGB(35, 35, 40);
-    BackgroundColor = Color3.fromRGB(25, 25, 30);
-    AccentColor = Color3.fromRGB(85, 170, 85);
-    OutlineColor = Color3.fromRGB(60, 60, 65);
+    MainColor = Color3.fromRGB(0, 0, 0);
+    BackgroundColor = Color3.fromRGB(15, 15, 15);
+    AccentColor = Color3.fromRGB(184, 134, 11);
+    OutlineColor = Color3.fromRGB(40, 40, 40);
     RiskColor = Color3.fromRGB(255, 50, 50),
     PinkColor = Color3.fromRGB(255, 105, 180),
 
@@ -3117,11 +3117,6 @@ function Library:CreateWindow(...)
         BorderColor3 = 'OutlineColor';
     });
 
-    Library:Create('UICorner', {
-        CornerRadius = UDim.new(0, 7);
-        Parent = TitleSection;
-    });
-
     local TitleSectionStroke = Library:Create('UIStroke', {
         Color = Library.OutlineColor;
         Thickness = 1;
@@ -3145,11 +3140,6 @@ function Library:CreateWindow(...)
 
     Library:AddToRegistry(LogoBackground, {
         BorderColor3 = 'OutlineColor';
-    });
-
-    Library:Create('UICorner', {
-        CornerRadius = UDim.new(0, 7);
-        Parent = LogoBackground;
     });
 
     -- Logo image
@@ -3231,11 +3221,6 @@ function Library:CreateWindow(...)
         BorderColor3 = 'OutlineColor';
     });
 
-    Library:Create('UICorner', {
-        CornerRadius = UDim.new(0, 7);
-        Parent = BottomSection;
-    });
-
     local BottomSectionStroke = Library:Create('UIStroke', {
         Color = Library.OutlineColor;
         Thickness = 1;
@@ -3283,12 +3268,6 @@ function Library:CreateWindow(...)
         ZIndex = 2;
         Parent = MainSectionInner;
     });
-    
-    Library:Create('UICorner', {
-        CornerRadius = UDim.new(0, 7);
-        Parent = TabContainer;
-    });
-    
 
     Library:AddToRegistry(TabContainer, {
         BackgroundColor3 = 'BackgroundColor';
@@ -3362,11 +3341,6 @@ function Library:CreateWindow(...)
             Parent = TabsContainer;
         });
 
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 7);
-            Parent = TabButton;
-        });
-
         local TabButtonStroke = Library:Create('UIStroke', {
             Color = Library.OutlineColor;
             Thickness = 1;
@@ -3395,11 +3369,6 @@ function Library:CreateWindow(...)
             ZIndex = 2;
             Parent = TabButton;
             BackgroundTransparency = 0.7;
-        });
-
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 7);
-            Parent = TabAccent;
         });
 
         Library:AddToRegistry(TabAccent, {
