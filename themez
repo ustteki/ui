@@ -5,14 +5,14 @@ local ThemeManager = {} do
 
 	ThemeManager.Library = nil
 	ThemeManager.BuiltInThemes = {
-		['Default'] 		= { 1, httpService:JSONDecode('{"FontColor":"c2b280","MainColor":"000000","AccentColor":"b8860b","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
-		['BBot'] 			= { 2, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
-		['Fatality']		= { 3, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
-		['Jester'] 			= { 4, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
-		['Mint'] 			= { 5, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
-		['Tokyo Night'] 	= { 6, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
-		['Ubuntu'] 			= { 7, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
-		['Quartz'] 			= { 8, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
+		['Default'] 		= { 1, httpService:JSONDecode('{"FontColor":"c2b280","MainColor":"000000","AccentColor":"b8860b","AccentColorSecondary":"daa520","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
+		['BBot'] 			= { 2, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","AccentColorSecondary":"daa520","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
+		['Fatality']		= { 3, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","AccentColorSecondary":"daa520","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
+		['Jester'] 			= { 4, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","AccentColorSecondary":"daa520","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
+		['Mint'] 			= { 5, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","AccentColorSecondary":"daa520","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
+		['Tokyo Night'] 	= { 6, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","AccentColorSecondary":"daa520","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
+		['Ubuntu'] 			= { 7, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","AccentColorSecondary":"daa520","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
+		['Quartz'] 			= { 8, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"000000","AccentColor":"b8860b","AccentColorSecondary":"daa520","BackgroundColor":"0a0a0a","OutlineColor":"1a1a1a"}') },
 	}
 
 	function ThemeManager:ApplyTheme(theme)
@@ -25,10 +25,20 @@ local ThemeManager = {} do
 
 		local scheme = data[2]
 		for idx, col in next, customThemeData or scheme do
-			self.Library[idx] = Color3.fromHex(col)
-			
-			if Options[idx] then
-				Options[idx]:SetValueRGB(Color3.fromHex(col))
+			if idx ~= "EnableGradients" then
+				self.Library[idx] = Color3.fromHex(col)
+				
+				if Options[idx] then
+					Options[idx]:SetValueRGB(Color3.fromHex(col))
+				end
+			end
+		end
+
+		-- Handle gradient setting for custom themes
+		if customThemeData and customThemeData.EnableGradients ~= nil then
+			getgenv().EnableGradients = customThemeData.EnableGradients
+			if Options.EnableGradients then
+				Options.EnableGradients:SetValue(customThemeData.EnableGradients)
 			end
 		end
 
@@ -37,7 +47,7 @@ local ThemeManager = {} do
 
 	function ThemeManager:ThemeUpdate()
 		-- This allows us to force apply themes without loading the themes tab :)
-		local options = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+		local options = { "FontColor", "MainColor", "AccentColor", "AccentColorSecondary", "BackgroundColor", "OutlineColor" }
 		for i, field in next, options do
 			if Options and Options[field] then
 				self.Library[field] = Options[field].Value
@@ -45,6 +55,7 @@ local ThemeManager = {} do
 		end
 
 		self.Library.AccentColorDark = self.Library:GetDarkerColor(self.Library.AccentColor);
+		self.Library.AccentColorSecondaryDark = self.Library:GetDarkerColor(self.Library.AccentColorSecondary);
 		self.Library:UpdateColorsUsingRegistry()
 	end
 
@@ -79,8 +90,19 @@ local ThemeManager = {} do
 		groupbox:AddLabel('Background color'):AddColorPicker('BackgroundColor', { Default = self.Library.BackgroundColor });
 		groupbox:AddLabel('Main color')	:AddColorPicker('MainColor', { Default = self.Library.MainColor });
 		groupbox:AddLabel('Accent color'):AddColorPicker('AccentColor', { Default = self.Library.AccentColor });
+		groupbox:AddLabel('Accent color secondary'):AddColorPicker('AccentColorSecondary', { Default = self.Library.AccentColorSecondary });
 		groupbox:AddLabel('Outline color'):AddColorPicker('OutlineColor', { Default = self.Library.OutlineColor });
 		groupbox:AddLabel('Font color')	:AddColorPicker('FontColor', { Default = self.Library.FontColor });
+
+		groupbox:AddDivider()
+		groupbox:AddToggle('EnableGradients', {
+			Text = 'Enable Gradients',
+			Default = true,
+			Callback = function(value)
+				getgenv().EnableGradients = value;
+				self.Library:UpdateColorsUsingRegistry();
+			end
+		});
 
 		local ThemesArray = {}
 		for Name, Theme in next, self.BuiltInThemes do
@@ -136,6 +158,7 @@ local ThemeManager = {} do
 		Options.BackgroundColor:OnChanged(UpdateTheme)
 		Options.MainColor:OnChanged(UpdateTheme)
 		Options.AccentColor:OnChanged(UpdateTheme)
+		Options.AccentColorSecondary:OnChanged(UpdateTheme)
 		Options.OutlineColor:OnChanged(UpdateTheme)
 		Options.FontColor:OnChanged(UpdateTheme)
 	end
@@ -162,11 +185,14 @@ local ThemeManager = {} do
 		end
 
 		local theme = {}
-		local fields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+		local fields = { "FontColor", "MainColor", "AccentColor", "AccentColorSecondary", "BackgroundColor", "OutlineColor" }
 
 		for _, field in next, fields do
 			theme[field] = Options[field].Value:ToHex()
 		end
+
+		-- Save gradient setting
+		theme.EnableGradients = getgenv().EnableGradients
 
 		writefile(self.Folder .. '/themes/' .. file .. '.json', httpService:JSONEncode(theme))
 	end
