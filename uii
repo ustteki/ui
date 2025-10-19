@@ -24,6 +24,17 @@ local Options = {};
 getgenv().Toggles = Toggles;
 getgenv().Options = Options;
 
+-- Initialize gradient settings early
+getgenv().EnableGradients = getgenv().EnableGradients ~= false; -- Default to true
+
+-- Safe function to check gradient setting
+local function shouldUseGradients()
+    local success, result = pcall(function()
+        return getgenv().EnableGradients ~= false
+    end)
+    return success and result or true -- Default to true if getgenv fails
+end
+
 local Library = {
     Registry = {};
     RegistryMap = {};
@@ -403,14 +414,14 @@ function Library:UpdateColorsUsingRegistry()
     -- Update all gradients
     for _, Object in next, Library.Registry do
         if Object.Instance:IsA('UIGradient') then
-            local shouldUseGradients = getgenv().EnableGradients ~= false;
+            local useGradients = shouldUseGradients();
             
             -- Update slider gradients
             if Object.Instance.Parent and Object.Instance.Parent.Name == 'Fill' then
-                if shouldUseGradients then
+                if useGradients then
                     Object.Instance.Color = ColorSequence.new({
                         ColorSequenceKeypoint.new(0, Library.AccentColor),
-                        ColorSequenceKeypoint.new(1, Library.AccentColorSecondary)
+                        ColorSequenceKeypoint.new(1, Library.AccentColorSecondary or Library.AccentColor)
                     });
                 else
                     Object.Instance.Color = ColorSequence.new({
@@ -422,10 +433,10 @@ function Library:UpdateColorsUsingRegistry()
             -- Update toggle gradients
             if Object.Instance.Parent and Object.Instance.Parent.Parent and Object.Instance.Parent.Parent.Name:find('Toggle') then
                 if Object.Instance.Enabled then
-                    if shouldUseGradients then
+                    if useGradients then
                         Object.Instance.Color = ColorSequence.new({
                             ColorSequenceKeypoint.new(0, Library.AccentColor),
-                            ColorSequenceKeypoint.new(1, Library.AccentColorSecondary)
+                            ColorSequenceKeypoint.new(1, Library.AccentColorSecondary or Library.AccentColor)
                         });
                     else
                         Object.Instance.Color = ColorSequence.new({
@@ -1995,14 +2006,14 @@ do
             ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor;
             ToggleInner.BorderColor3 = Toggle.Value and Library.AccentColorDark or Library.OutlineColor;
 
-            -- Update gradient based on toggle state
-            local shouldUseGradients = getgenv().EnableGradients ~= false;
+            -- Update gradient based on toggle state with safe fallback
+            local useGradients = shouldUseGradients();
             if Toggle.Value then
                 ToggleGradient.Enabled = true;
-                if shouldUseGradients then
+                if useGradients then
                     ToggleGradient.Color = ColorSequence.new({
                         ColorSequenceKeypoint.new(0, Library.AccentColor),
-                        ColorSequenceKeypoint.new(1, Library.AccentColorSecondary)
+                        ColorSequenceKeypoint.new(1, Library.AccentColorSecondary or Library.AccentColor)
                     });
                 else
                     ToggleGradient.Color = ColorSequence.new({
@@ -2141,7 +2152,7 @@ do
         local SliderGradient = Library:Create('UIGradient', {
             Color = ColorSequence.new({
                 ColorSequenceKeypoint.new(0, Library.AccentColor),
-                ColorSequenceKeypoint.new(1, Library.AccentColorSecondary)
+                ColorSequenceKeypoint.new(1, Library.AccentColorSecondary or Library.AccentColor)
             });
             Rotation = 0;
             Parent = Fill;
@@ -2188,12 +2199,12 @@ do
             Fill.BackgroundColor3 = Library.AccentColor;
             Fill.BorderColor3 = Library.AccentColorDark;
             
-            -- Update gradient colors
-            local shouldUseGradients = getgenv().EnableGradients ~= false;
-            if shouldUseGradients then
+            -- Update gradient colors with safe fallback
+            local useGradients = shouldUseGradients();
+            if useGradients then
                 SliderGradient.Color = ColorSequence.new({
                     ColorSequenceKeypoint.new(0, Library.AccentColor),
-                    ColorSequenceKeypoint.new(1, Library.AccentColorSecondary)
+                    ColorSequenceKeypoint.new(1, Library.AccentColorSecondary or Library.AccentColor)
                 });
             else
                 SliderGradient.Color = ColorSequence.new({
