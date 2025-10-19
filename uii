@@ -24,17 +24,6 @@ local Options = {};
 getgenv().Toggles = Toggles;
 getgenv().Options = Options;
 
--- Initialize gradient settings early
-getgenv().EnableGradients = getgenv().EnableGradients ~= false; -- Default to true
-
--- Safe function to check gradient setting
-local function shouldUseGradients()
-    local success, result = pcall(function()
-        return getgenv().EnableGradients ~= false
-    end)
-    return success and result or true -- Default to true if getgenv fails
-end
-
 local Library = {
     Registry = {};
     RegistryMap = {};
@@ -45,7 +34,6 @@ local Library = {
     MainColor = Color3.fromRGB(35, 35, 40);
     BackgroundColor = Color3.fromRGB(25, 25, 30);
     AccentColor = Color3.fromRGB(85, 170, 85);
-    AccentColorSecondary = Color3.fromRGB(120, 200, 120);
     OutlineColor = Color3.fromRGB(60, 60, 65);
     RiskColor = Color3.fromRGB(255, 50, 50),
     PinkColor = Color3.fromRGB(255, 105, 180),
@@ -352,7 +340,6 @@ function Library:GetDarkerColor(Color)
     return Color3.fromHSV(H, S, V / 1.5);
 end;
 Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor);
-Library.AccentColorSecondaryDark = Library:GetDarkerColor(Library.AccentColorSecondary);
 
 function Library:AddToRegistry(Instance, Properties, IsHud)
     local Idx = #Library.Registry + 1;
@@ -409,45 +396,6 @@ function Library:UpdateColorsUsingRegistry()
                 Object.Instance[Property] = ColorIdx()
             end
         end;
-    end;
-    
-    -- Update all gradients
-    for _, Object in next, Library.Registry do
-        if Object.Instance:IsA('UIGradient') then
-            local useGradients = shouldUseGradients();
-            
-            -- Update slider gradients
-            if Object.Instance.Parent and Object.Instance.Parent.Name == 'Fill' then
-                if useGradients then
-                    Object.Instance.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Library.AccentColor),
-                        ColorSequenceKeypoint.new(1, Library.AccentColorSecondary or Library.AccentColor)
-                    });
-                else
-                    Object.Instance.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Library.AccentColor),
-                        ColorSequenceKeypoint.new(1, Library.AccentColor)
-                    });
-                end
-            end
-            -- Update toggle gradients
-            if Object.Instance.Parent and Object.Instance.Parent.Parent and Object.Instance.Parent.Parent.Name:find('Toggle') then
-                if Object.Instance.Enabled then
-                    if useGradients then
-                        Object.Instance.Color = ColorSequence.new({
-                            ColorSequenceKeypoint.new(0, Library.AccentColor),
-                            ColorSequenceKeypoint.new(1, Library.AccentColorSecondary or Library.AccentColor)
-                        });
-                    else
-                        Object.Instance.Color = ColorSequence.new({
-                            ColorSequenceKeypoint.new(0, Library.AccentColor),
-                            ColorSequenceKeypoint.new(1, Library.AccentColor)
-                        });
-                    end
-                end
-            end
-        end
-    end;
     end;
 end;
 
@@ -1434,7 +1382,7 @@ do
         local Container = Groupbox.Container;
 
         local TextLabel = Library:CreateLabel({
-            Size = UDim2.new(1, 0, 0, 15);
+            Size = UDim2.new(1, -4, 0, 15);
             TextSize = 10;
             Text = Text;
             TextWrapped = DoesWrap or false,
@@ -1445,7 +1393,7 @@ do
 
         if DoesWrap then
             local Y = select(2, Library:GetTextBounds(Text, Library.Font, 14, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)))
-            TextLabel.Size = UDim2.new(1, 0, 0, Y)
+            TextLabel.Size = UDim2.new(1, -4, 0, Y)
         else
             Library:Create('UIListLayout', {
                 Padding = UDim.new(0, 4);
@@ -1464,7 +1412,7 @@ do
 
             if DoesWrap then
                 local Y = select(2, Library:GetTextBounds(Text, Library.Font, 14, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)))
-                TextLabel.Size = UDim2.new(1, 0, 0, Y)
+                TextLabel.Size = UDim2.new(1, -4, 0, Y)
             end
 
             Groupbox:Resize();
@@ -1507,7 +1455,7 @@ do
             local Outer = Library:Create('Frame', {
                 BackgroundColor3 = Color3.new(0, 0, 0);
                 BorderColor3 = Color3.new(0, 0, 0);
-                Size = UDim2.new(1, 0, 0, 20);
+                Size = UDim2.new(1, -4, 0, 20);
                 ZIndex = 5;
             });
 
@@ -1679,7 +1627,7 @@ do
         local DividerOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, 0, 0, 5);
+            Size = UDim2.new(1, -4, 0, 5);
             ZIndex = 5;
             Parent = Container;
         });
@@ -1735,7 +1683,7 @@ do
         local TextBoxOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, 0, 0, 20);
+            Size = UDim2.new(1, -4, 0, 20);
             ZIndex = 5;
             Parent = Container;
         });
@@ -1942,23 +1890,10 @@ do
             Parent = ToggleOuter;
         });
 
-        -- Add gradient to toggle inner
-        local ToggleGradient = Library:Create('UIGradient', {
-            Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Library.MainColor),
-                ColorSequenceKeypoint.new(1, Library.MainColor)
-            });
-            Rotation = 45;
-            Enabled = false;
-            Parent = ToggleInner;
-        });
-
         Library:AddToRegistry(ToggleInner, {
             BackgroundColor3 = 'MainColor';
             BorderColor3 = 'OutlineColor';
         });
-
-        Library:AddToRegistry(ToggleGradient, {});
 
         local ToggleLabel = Library:CreateLabel({
             Size = UDim2.new(0, 216, 1, 0);
@@ -1998,32 +1933,9 @@ do
             Library:AddToolTip(Info.Tooltip, ToggleRegion)
         end
 
-        function Toggle:UpdateColors()
-            Toggle:Display();
-        end;
-
         function Toggle:Display()
             ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor;
             ToggleInner.BorderColor3 = Toggle.Value and Library.AccentColorDark or Library.OutlineColor;
-
-            -- Update gradient based on toggle state with safe fallback
-            local useGradients = shouldUseGradients();
-            if Toggle.Value then
-                ToggleGradient.Enabled = true;
-                if useGradients then
-                    ToggleGradient.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Library.AccentColor),
-                        ColorSequenceKeypoint.new(1, Library.AccentColorSecondary or Library.AccentColor)
-                    });
-                else
-                    ToggleGradient.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Library.AccentColor),
-                        ColorSequenceKeypoint.new(1, Library.AccentColor)
-                    });
-                end
-            else
-                ToggleGradient.Enabled = false;
-            end
 
             Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and 'AccentColor' or 'MainColor';
             Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Toggle.Value and 'AccentColorDark' or 'OutlineColor';
@@ -2117,7 +2029,7 @@ do
         local SliderOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, 0, 0, 13);
+            Size = UDim2.new(1, -4, 0, 13);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2148,22 +2060,10 @@ do
             Parent = SliderInner;
         });
 
-        -- Add gradient to slider fill
-        local SliderGradient = Library:Create('UIGradient', {
-            Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Library.AccentColor),
-                ColorSequenceKeypoint.new(1, Library.AccentColorSecondary or Library.AccentColor)
-            });
-            Rotation = 0;
-            Parent = Fill;
-        });
-
         Library:AddToRegistry(Fill, {
             BackgroundColor3 = 'AccentColor';
             BorderColor3 = 'AccentColorDark';
         });
-
-        Library:AddToRegistry(SliderGradient, {});
 
         local HideBorderRight = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
@@ -2198,20 +2098,6 @@ do
         function Slider:UpdateColors()
             Fill.BackgroundColor3 = Library.AccentColor;
             Fill.BorderColor3 = Library.AccentColorDark;
-            
-            -- Update gradient colors with safe fallback
-            local useGradients = shouldUseGradients();
-            if useGradients then
-                SliderGradient.Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, Library.AccentColor),
-                    ColorSequenceKeypoint.new(1, Library.AccentColorSecondary or Library.AccentColor)
-                });
-            else
-                SliderGradient.Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, Library.AccentColor),
-                    ColorSequenceKeypoint.new(1, Library.AccentColor)
-                });
-            end
         end;
 
         function Slider:Display()
@@ -2367,7 +2253,7 @@ do
         local DropdownOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, 0, 0, 20);
+            Size = UDim2.new(1, -4, 0, 20);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2878,8 +2764,7 @@ do
         -- Buttons Container (First Row)
         local ButtonsFrame = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(1, -8, 0, 20);
-            Position = UDim2.new(0, 4, 0, 0);
+            Size = UDim2.new(1, -4, 0, 20);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2910,8 +2795,7 @@ do
         -- Buttons Container (Second Row)
         local ButtonsFrame2 = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(1, -8, 0, 20);
-            Position = UDim2.new(0, 4, 0, 0);
+            Size = UDim2.new(1, -4, 0, 20);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2921,7 +2805,7 @@ do
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
             Position = UDim2.new(0, 0, 0, 0);
-            Size = UDim2.new(0.485, 0, 1, 0);
+            Size = UDim2.new(0.48, 0, 1, 0);
             Font = Library.Font;
             Text = "Teleport To";
             TextColor3 = Library.FontColor;
@@ -2941,8 +2825,8 @@ do
         local SetTargetButton = Library:Create('TextButton', {
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
-            Position = UDim2.new(0.515, 0, 0, 0);
-            Size = UDim2.new(0.485, 0, 1, 0);
+            Position = UDim2.new(0.52, 0, 0, 0);
+            Size = UDim2.new(0.48, 0, 1, 0);
             Font = Library.Font;
             Text = "Set Target";
             TextColor3 = Library.FontColor;
@@ -2964,8 +2848,7 @@ do
         local ScrollOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -8, 0, 300);
-            Position = UDim2.new(0, 4, 0, 0);
+            Size = UDim2.new(1, -4, 0, 300);
             ZIndex = 5;
             Parent = Container;
         });
@@ -3013,8 +2896,7 @@ do
         local InfoFrame = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
-            Size = UDim2.new(1, -8, 0, 80);
-            Position = UDim2.new(0, 4, 0, 0);
+            Size = UDim2.new(1, -4, 0, 80);
             ZIndex = 5;
             Parent = Container;
         });
@@ -3096,7 +2978,7 @@ do
                 BackgroundColor3 = Library.MainColor;
                 BorderColor3 = Library.OutlineColor;
                 Name = player.Name;
-                Size = UDim2.new(1, -8, 0, 50);
+                Size = UDim2.new(1, -4, 0, 50);
                 ZIndex = 7;
                 Parent = ScrollInner;
             });
@@ -4128,7 +4010,7 @@ function Library:CreateWindow(...)
             local Container = Library:Create('Frame', {
                 BackgroundTransparency = 1;
                 Position = UDim2.new(0, 4, 0, 20);
-                Size = UDim2.new(1, -8, 1, -20);
+                Size = UDim2.new(1, -4, 1, -20);
                 ZIndex = 1;
                 Parent = BoxInner;
             });
@@ -4271,7 +4153,7 @@ function Library:CreateWindow(...)
                 local Container = Library:Create('Frame', {
                     BackgroundTransparency = 1;
                     Position = UDim2.new(0, 4, 0, 20);
-                    Size = UDim2.new(1, -8, 1, -20);
+                    Size = UDim2.new(1, -4, 1, -20);
                     ZIndex = 1;
                     Visible = false;
                     Parent = BoxInner;
