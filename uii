@@ -34,6 +34,7 @@ local Library = {
     MainColor = Color3.fromRGB(35, 35, 40);
     BackgroundColor = Color3.fromRGB(25, 25, 30);
     AccentColor = Color3.fromRGB(85, 170, 85);
+    AccentColorSecondary = Color3.fromRGB(120, 200, 120);
     OutlineColor = Color3.fromRGB(60, 60, 65);
     RiskColor = Color3.fromRGB(255, 50, 50),
     PinkColor = Color3.fromRGB(255, 105, 180),
@@ -340,6 +341,7 @@ function Library:GetDarkerColor(Color)
     return Color3.fromHSV(H, S, V / 1.5);
 end;
 Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor);
+Library.AccentColorSecondaryDark = Library:GetDarkerColor(Library.AccentColorSecondary);
 
 function Library:AddToRegistry(Instance, Properties, IsHud)
     local Idx = #Library.Registry + 1;
@@ -396,6 +398,45 @@ function Library:UpdateColorsUsingRegistry()
                 Object.Instance[Property] = ColorIdx()
             end
         end;
+    end;
+    
+    -- Update all gradients
+    for _, Object in next, Library.Registry do
+        if Object.Instance:IsA('UIGradient') then
+            local shouldUseGradients = getgenv().EnableGradients ~= false;
+            
+            -- Update slider gradients
+            if Object.Instance.Parent and Object.Instance.Parent.Name == 'Fill' then
+                if shouldUseGradients then
+                    Object.Instance.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Library.AccentColor),
+                        ColorSequenceKeypoint.new(1, Library.AccentColorSecondary)
+                    });
+                else
+                    Object.Instance.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Library.AccentColor),
+                        ColorSequenceKeypoint.new(1, Library.AccentColor)
+                    });
+                end
+            end
+            -- Update toggle gradients
+            if Object.Instance.Parent and Object.Instance.Parent.Parent and Object.Instance.Parent.Parent.Name:find('Toggle') then
+                if Object.Instance.Enabled then
+                    if shouldUseGradients then
+                        Object.Instance.Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, Library.AccentColor),
+                            ColorSequenceKeypoint.new(1, Library.AccentColorSecondary)
+                        });
+                    else
+                        Object.Instance.Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, Library.AccentColor),
+                            ColorSequenceKeypoint.new(1, Library.AccentColor)
+                        });
+                    end
+                end
+            end
+        end
+    end;
     end;
 end;
 
@@ -1890,10 +1931,23 @@ do
             Parent = ToggleOuter;
         });
 
+        -- Add gradient to toggle inner
+        local ToggleGradient = Library:Create('UIGradient', {
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Library.MainColor),
+                ColorSequenceKeypoint.new(1, Library.MainColor)
+            });
+            Rotation = 45;
+            Enabled = false;
+            Parent = ToggleInner;
+        });
+
         Library:AddToRegistry(ToggleInner, {
             BackgroundColor3 = 'MainColor';
             BorderColor3 = 'OutlineColor';
         });
+
+        Library:AddToRegistry(ToggleGradient, {});
 
         local ToggleLabel = Library:CreateLabel({
             Size = UDim2.new(0, 216, 1, 0);
@@ -1933,9 +1987,32 @@ do
             Library:AddToolTip(Info.Tooltip, ToggleRegion)
         end
 
+        function Toggle:UpdateColors()
+            Toggle:Display();
+        end;
+
         function Toggle:Display()
             ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor;
             ToggleInner.BorderColor3 = Toggle.Value and Library.AccentColorDark or Library.OutlineColor;
+
+            -- Update gradient based on toggle state
+            local shouldUseGradients = getgenv().EnableGradients ~= false;
+            if Toggle.Value then
+                ToggleGradient.Enabled = true;
+                if shouldUseGradients then
+                    ToggleGradient.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Library.AccentColor),
+                        ColorSequenceKeypoint.new(1, Library.AccentColorSecondary)
+                    });
+                else
+                    ToggleGradient.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Library.AccentColor),
+                        ColorSequenceKeypoint.new(1, Library.AccentColor)
+                    });
+                end
+            else
+                ToggleGradient.Enabled = false;
+            end
 
             Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and 'AccentColor' or 'MainColor';
             Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Toggle.Value and 'AccentColorDark' or 'OutlineColor';
@@ -2060,10 +2137,22 @@ do
             Parent = SliderInner;
         });
 
+        -- Add gradient to slider fill
+        local SliderGradient = Library:Create('UIGradient', {
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Library.AccentColor),
+                ColorSequenceKeypoint.new(1, Library.AccentColorSecondary)
+            });
+            Rotation = 0;
+            Parent = Fill;
+        });
+
         Library:AddToRegistry(Fill, {
             BackgroundColor3 = 'AccentColor';
             BorderColor3 = 'AccentColorDark';
         });
+
+        Library:AddToRegistry(SliderGradient, {});
 
         local HideBorderRight = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
@@ -2098,6 +2187,20 @@ do
         function Slider:UpdateColors()
             Fill.BackgroundColor3 = Library.AccentColor;
             Fill.BorderColor3 = Library.AccentColorDark;
+            
+            -- Update gradient colors
+            local shouldUseGradients = getgenv().EnableGradients ~= false;
+            if shouldUseGradients then
+                SliderGradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Library.AccentColor),
+                    ColorSequenceKeypoint.new(1, Library.AccentColorSecondary)
+                });
+            else
+                SliderGradient.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Library.AccentColor),
+                    ColorSequenceKeypoint.new(1, Library.AccentColor)
+                });
+            end
         end;
 
         function Slider:Display()
