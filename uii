@@ -1382,7 +1382,7 @@ do
         local Container = Groupbox.Container;
 
         local TextLabel = Library:CreateLabel({
-            Size = UDim2.new(1, -4, 0, 15);
+            Size = UDim2.new(1, 0, 0, 15);
             TextSize = 10;
             Text = Text;
             TextWrapped = DoesWrap or false,
@@ -1393,7 +1393,7 @@ do
 
         if DoesWrap then
             local Y = select(2, Library:GetTextBounds(Text, Library.Font, 14, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)))
-            TextLabel.Size = UDim2.new(1, -4, 0, Y)
+            TextLabel.Size = UDim2.new(1, 0, 0, Y)
         else
             Library:Create('UIListLayout', {
                 Padding = UDim.new(0, 4);
@@ -1412,7 +1412,7 @@ do
 
             if DoesWrap then
                 local Y = select(2, Library:GetTextBounds(Text, Library.Font, 14, Vector2.new(TextLabel.AbsoluteSize.X, math.huge)))
-                TextLabel.Size = UDim2.new(1, -4, 0, Y)
+                TextLabel.Size = UDim2.new(1, 0, 0, Y)
             end
 
             Groupbox:Resize();
@@ -1455,7 +1455,7 @@ do
             local Outer = Library:Create('Frame', {
                 BackgroundColor3 = Color3.new(0, 0, 0);
                 BorderColor3 = Color3.new(0, 0, 0);
-                Size = UDim2.new(1, -4, 0, 20);
+                Size = UDim2.new(1, 0, 0, 20);
                 ZIndex = 5;
             });
 
@@ -1627,7 +1627,7 @@ do
         local DividerOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -4, 0, 5);
+            Size = UDim2.new(1, 0, 0, 5);
             ZIndex = 5;
             Parent = Container;
         });
@@ -1683,7 +1683,7 @@ do
         local TextBoxOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -4, 0, 20);
+            Size = UDim2.new(1, 0, 0, 20);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2029,7 +2029,7 @@ do
         local SliderOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -4, 0, 13);
+            Size = UDim2.new(1, 0, 0, 13);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2253,7 +2253,7 @@ do
         local DropdownOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -4, 0, 20);
+            Size = UDim2.new(1, 0, 0, 20);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2764,7 +2764,8 @@ do
         -- Buttons Container (First Row)
         local ButtonsFrame = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(1, -4, 0, 20);
+            Size = UDim2.new(1, -8, 0, 20);
+            Position = UDim2.new(0, 4, 0, 0);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2795,7 +2796,8 @@ do
         -- Buttons Container (Second Row)
         local ButtonsFrame2 = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(1, -4, 0, 20);
+            Size = UDim2.new(1, -8, 0, 20);
+            Position = UDim2.new(0, 4, 0, 0);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2805,7 +2807,7 @@ do
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
             Position = UDim2.new(0, 0, 0, 0);
-            Size = UDim2.new(0.48, 0, 1, 0);
+            Size = UDim2.new(0.485, 0, 1, 0);
             Font = Library.Font;
             Text = "Teleport To";
             TextColor3 = Library.FontColor;
@@ -2825,8 +2827,8 @@ do
         local SetTargetButton = Library:Create('TextButton', {
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
-            Position = UDim2.new(0.52, 0, 0, 0);
-            Size = UDim2.new(0.48, 0, 1, 0);
+            Position = UDim2.new(0.515, 0, 0, 0);
+            Size = UDim2.new(0.485, 0, 1, 0);
             Font = Library.Font;
             Text = "Set Target";
             TextColor3 = Library.FontColor;
@@ -2848,7 +2850,8 @@ do
         local ScrollOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -4, 0, 300);
+            Size = UDim2.new(1, -8, 0, 300);
+            Position = UDim2.new(0, 4, 0, 0);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2896,7 +2899,8 @@ do
         local InfoFrame = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
-            Size = UDim2.new(1, -4, 0, 80);
+            Size = UDim2.new(1, -8, 0, 80);
+            Position = UDim2.new(0, 4, 0, 0);
             ZIndex = 5;
             Parent = Container;
         });
@@ -2978,7 +2982,7 @@ do
                 BackgroundColor3 = Library.MainColor;
                 BorderColor3 = Library.OutlineColor;
                 Name = player.Name;
-                Size = UDim2.new(1, -4, 0, 50);
+                Size = UDim2.new(1, -8, 0, 50);
                 ZIndex = 7;
                 Parent = ScrollInner;
             });
@@ -4010,7 +4014,7 @@ function Library:CreateWindow(...)
             local Container = Library:Create('Frame', {
                 BackgroundTransparency = 1;
                 Position = UDim2.new(0, 4, 0, 20);
-                Size = UDim2.new(1, -4, 1, -20);
+                Size = UDim2.new(1, -8, 1, -20);
                 ZIndex = 1;
                 Parent = BoxInner;
             });
@@ -4153,7 +4157,7 @@ function Library:CreateWindow(...)
                 local Container = Library:Create('Frame', {
                     BackgroundTransparency = 1;
                     Position = UDim2.new(0, 4, 0, 20);
-                    Size = UDim2.new(1, -4, 1, -20);
+                    Size = UDim2.new(1, -8, 1, -20);
                     ZIndex = 1;
                     Visible = false;
                     Parent = BoxInner;
