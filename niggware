@@ -30,12 +30,11 @@ local Library = {
     HudRegistry = {};
 
     FontColor = Color3.fromRGB(255, 255, 255);
-    MainColor = Color3.fromRGB(39, 39, 39);
-    BackgroundColor = Color3.fromRGB(39, 39, 39);
+    MainColor = Color3.fromRGB(28, 28, 28);
+    BackgroundColor = Color3.fromRGB(20, 20, 20);
     AccentColor = Color3.fromRGB(0, 85, 255);
     OutlineColor = Color3.fromRGB(50, 50, 50);
     RiskColor = Color3.fromRGB(255, 50, 50),
-    GroupboxOutlineColor = Color3.fromRGB(40, 80, 80); -- Faint cyan outline
 
     Black = Color3.new(0, 0, 0);
     Font = Enum.Font.Code,
@@ -194,7 +193,7 @@ function Library:AddToolTip(InfoStr, HoverInstance)
     local X, Y = Library:GetTextBounds(InfoStr, Library.Font, 14);
     local Tooltip = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor,
-        BorderSizePixel = 0,
+        BorderColor3 = Library.OutlineColor,
 
         Size = UDim2.fromOffset(X + 5, Y + 4),
         ZIndex = 100,
@@ -217,6 +216,7 @@ function Library:AddToolTip(InfoStr, HoverInstance)
 
     Library:AddToRegistry(Tooltip, {
         BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'OutlineColor';
     });
 
     Library:AddToRegistry(Label, {
@@ -1469,6 +1469,11 @@ do
                 BorderColor3 = 'OutlineColor';
             });
 
+            Library:OnHighlight(Outer, Outer,
+                { BorderColor3 = 'AccentColor' },
+                { BorderColor3 = 'Black' }
+            );
+
             return Outer, Inner, Label
         end
 
@@ -1671,6 +1676,11 @@ do
             BorderColor3 = 'OutlineColor';
         });
 
+        Library:OnHighlight(TextBoxOuter, TextBoxOuter,
+            { BorderColor3 = 'AccentColor' },
+            { BorderColor3 = 'Black' }
+        );
+
         if type(Info.Tooltip) == 'string' then
             Library:AddToolTip(Info.Tooltip, TextBoxOuter)
         end
@@ -1870,6 +1880,11 @@ do
             Parent = ToggleOuter;
         });
 
+        Library:OnHighlight(ToggleRegion, ToggleOuter,
+            { BorderColor3 = 'AccentColor' },
+            { BorderColor3 = 'Black' }
+        );
+
         function Toggle:UpdateColors()
             Toggle:Display();
         end;
@@ -1880,9 +1895,10 @@ do
 
         function Toggle:Display()
             ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor;
-            ToggleInner.BorderSizePixel = 0;
+            ToggleInner.BorderColor3 = Toggle.Value and Library.AccentColorDark or Library.OutlineColor;
 
             Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and 'AccentColor' or 'MainColor';
+            Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Toggle.Value and 'AccentColorDark' or 'OutlineColor';
         end;
 
         function Toggle:OnChanged(Func)
@@ -1998,7 +2014,7 @@ do
 
         local Fill = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
+            BorderColor3 = Library.AccentColorDark;
             Size = UDim2.new(0, 0, 1, 0);
             ZIndex = 7;
             Parent = SliderInner;
@@ -2006,6 +2022,7 @@ do
 
         Library:AddToRegistry(Fill, {
             BackgroundColor3 = 'AccentColor';
+            BorderColor3 = 'AccentColorDark';
         });
 
         local HideBorderRight = Library:Create('Frame', {
@@ -2029,12 +2046,18 @@ do
             Parent = SliderInner;
         });
 
+        Library:OnHighlight(SliderOuter, SliderOuter,
+            { BorderColor3 = 'AccentColor' },
+            { BorderColor3 = 'Black' }
+        );
+
         if type(Info.Tooltip) == 'string' then
             Library:AddToolTip(Info.Tooltip, SliderOuter)
         end
 
         function Slider:UpdateColors()
             Fill.BackgroundColor3 = Library.AccentColor;
+            Fill.BorderColor3 = Library.AccentColorDark;
         end;
 
         function Slider:Display()
@@ -2231,6 +2254,11 @@ do
             Parent = DropdownInner;
         });
 
+        Library:OnHighlight(DropdownOuter, DropdownOuter,
+            { BorderColor3 = 'AccentColor' },
+            { BorderColor3 = 'Black' }
+        );
+
         if type(Info.Tooltip) == 'string' then
             Library:AddToolTip(Info.Tooltip, DropdownOuter)
         end
@@ -2374,6 +2402,11 @@ do
                     ZIndex = 25;
                     Parent = Button;
                 });
+
+                Library:OnHighlight(Button, Button,
+                    { BorderColor3 = 'AccentColor', ZIndex = 24 },
+                    { BorderColor3 = 'OutlineColor', ZIndex = 23 }
+                );
 
                 local Selected;
 
@@ -2673,14 +2706,15 @@ do
 
     local WatermarkInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BorderSizePixel = 0;
+        BorderColor3 = Library.AccentColor;
+        BorderMode = Enum.BorderMode.Inset;
         Size = UDim2.new(1, 0, 1, 0);
         ZIndex = 201;
         Parent = WatermarkOuter;
     });
 
     Library:AddToRegistry(WatermarkInner, {
-        BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'AccentColor';
     });
 
     local InnerFrame = Library:Create('Frame', {
@@ -2940,22 +2974,24 @@ function Library:CreateWindow(...)
 
     local Inner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BorderSizePixel = 0; -- Remove the outline
-        Position = UDim2.new(0, 0, 0, 0);
-        Size = UDim2.new(1, 0, 1, 0);
+        BorderColor3 = Library.AccentColor;
+        BorderMode = Enum.BorderMode.Inset;
+        Position = UDim2.new(0, 1, 0, 1);
+        Size = UDim2.new(1, -2, 1, -2);
         ZIndex = 1;
         Parent = Outer;
     });
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = 'MainColor';
+        BorderColor3 = 'AccentColor';
     });
 
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 0, 0, 0);
-        Size = UDim2.new(1, 0, 0, 25);
+        Position = UDim2.new(0, 7, 0, 0);
+        Size = UDim2.new(0, 0, 0, 25);
         Text = Config.Title or '';
-        TextXAlignment = Enum.TextXAlignment.Center; -- Force centered
+        TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
         Parent = Inner;
     });
@@ -2997,7 +3033,7 @@ function Library:CreateWindow(...)
     });
 
     local TabListLayout = Library:Create('UIListLayout', {
-        Padding = UDim.new(0, Config.TabPadding + 6); -- Added 6 pixels for spacing
+        Padding = UDim.new(0, Config.TabPadding);
         FillDirection = Enum.FillDirection.Horizontal;
         SortOrder = Enum.SortOrder.LayoutOrder;
         Parent = TabArea;
@@ -3033,7 +3069,7 @@ function Library:CreateWindow(...)
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
             BorderColor3 = Library.OutlineColor;
-            Size = UDim2.new(0, TabButtonWidth + 16 + 8, 1, 0); -- Increased from 8 + 4 to 16 + 8
+            Size = UDim2.new(0, TabButtonWidth + 8 + 4, 1, 0);
             ZIndex = 1;
             Parent = TabArea;
         });
@@ -3043,42 +3079,10 @@ function Library:CreateWindow(...)
             BorderColor3 = 'OutlineColor';
         });
 
-        -- Add glowing stripe outline over the tab button (top)
-        local GlowStripe = Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 0, 0);
-            Size = UDim2.new(1, 0, 0, 2);
-            ZIndex = 4;
-            Visible = false; -- Initially hidden
-            Parent = TabButton;
-        });
-
-        Library:AddToRegistry(GlowStripe, {
-            BackgroundColor3 = 'AccentColor';
-        });
-
-        -- Add subtle glow line below the tab button and its border
-        local ThickGlow = Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BackgroundTransparency = 0.8;
-            BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 1, 0); -- Position right below the button border
-            Size = UDim2.new(1, 0, 0, 6); -- Taller glow effect
-            ZIndex = 2; -- Behind the main button (ZIndex 1)
-            Visible = false;
-            Parent = TabButton;
-        });
-
-        Library:AddToRegistry(ThickGlow, {
-            BackgroundColor3 = 'AccentColor';
-        });
-
         local TabButtonLabel = Library:CreateLabel({
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, -1);
             Text = Name;
-            TextXAlignment = Enum.TextXAlignment.Center; -- Center the text
             ZIndex = 1;
             Parent = TabButton;
         });
@@ -3163,32 +3167,6 @@ function Library:CreateWindow(...)
             Blocker.BackgroundTransparency = 0;
             TabButton.BackgroundColor3 = Library.MainColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
-            
-            -- Animate glow stripe and subtle glow appearance
-            GlowStripe.Visible = true;
-            ThickGlow.Visible = true;
-            GlowStripe.BackgroundTransparency = 1;
-            ThickGlow.BackgroundTransparency = 1;
-            
-            local appearTween = TweenService:Create(GlowStripe, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundTransparency = 0
-            });
-            local thickGlowTween = TweenService:Create(ThickGlow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundTransparency = 0.8
-            });
-            
-            appearTween:Play();
-            thickGlowTween:Play();
-            
-            -- Create subtle pulsing glow effect
-            appearTween.Completed:Connect(function()
-                local pulseTween = TweenService:Create(ThickGlow, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-                    BackgroundTransparency = 0.6
-                });
-                pulseTween:Play();
-                Tab.PulseTween = pulseTween; -- Store reference to stop later
-            end);
-            
             TabFrame.Visible = true;
         end;
 
@@ -3196,29 +3174,6 @@ function Library:CreateWindow(...)
             Blocker.BackgroundTransparency = 1;
             TabButton.BackgroundColor3 = Library.BackgroundColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
-            
-            -- Stop pulsing animation if it exists
-            if Tab.PulseTween then
-                Tab.PulseTween:Cancel();
-                Tab.PulseTween = nil;
-            end;
-            
-            -- Animate glow stripe and thick glow disappearance
-            local hideTween = TweenService:Create(GlowStripe, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundTransparency = 1
-            });
-            local thickHideTween = TweenService:Create(ThickGlow, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundTransparency = 1
-            });
-            
-            hideTween:Play();
-            thickHideTween:Play();
-            
-            hideTween.Completed:Connect(function()
-                GlowStripe.Visible = false;
-                ThickGlow.Visible = false;
-            end);
-            
             TabFrame.Visible = false;
         end;
 
@@ -3232,7 +3187,7 @@ function Library:CreateWindow(...)
 
             local BoxOuter = Library:Create('Frame', {
                 BackgroundColor3 = Library.BackgroundColor;
-                BorderColor3 = Library.GroupboxOutlineColor;
+                BorderColor3 = Library.OutlineColor;
                 BorderMode = Enum.BorderMode.Inset;
                 Size = UDim2.new(1, 0, 0, 507 + 2);
                 ZIndex = 2;
@@ -3241,22 +3196,7 @@ function Library:CreateWindow(...)
 
             Library:AddToRegistry(BoxOuter, {
                 BackgroundColor3 = 'BackgroundColor';
-                BorderColor3 = 'GroupboxOutlineColor';
-            });
-
-            -- Add subtle glow line below the groupbox border
-            local GroupboxGlow = Library:Create('Frame', {
-                BackgroundColor3 = Library.GroupboxOutlineColor;
-                BackgroundTransparency = 0.5;
-                BorderSizePixel = 0;
-                Position = UDim2.new(0, 0, 1, 0); -- Position right below the border
-                Size = UDim2.new(1, 0, 0, 6); -- Taller glow effect
-                ZIndex = 1; -- Behind the main box
-                Parent = BoxOuter;
-            });
-
-            Library:AddToRegistry(GroupboxGlow, {
-                BackgroundColor3 = 'GroupboxOutlineColor';
+                BorderColor3 = 'OutlineColor';
             });
 
             local BoxInner = Library:Create('Frame', {
@@ -3271,6 +3211,18 @@ function Library:CreateWindow(...)
 
             Library:AddToRegistry(BoxInner, {
                 BackgroundColor3 = 'BackgroundColor';
+            });
+
+            local Highlight = Library:Create('Frame', {
+                BackgroundColor3 = Library.AccentColor;
+                BorderSizePixel = 0;
+                Size = UDim2.new(1, 0, 0, 2);
+                ZIndex = 5;
+                Parent = BoxInner;
+            });
+
+            Library:AddToRegistry(Highlight, {
+                BackgroundColor3 = 'AccentColor';
             });
 
             local GroupboxLabel = Library:CreateLabel({
@@ -3361,6 +3313,18 @@ function Library:CreateWindow(...)
                 BackgroundColor3 = 'BackgroundColor';
             });
 
+            local Highlight = Library:Create('Frame', {
+                BackgroundColor3 = Library.AccentColor;
+                BorderSizePixel = 0;
+                Size = UDim2.new(1, 0, 0, 2);
+                ZIndex = 10;
+                Parent = BoxInner;
+            });
+
+            Library:AddToRegistry(Highlight, {
+                BackgroundColor3 = 'AccentColor';
+            });
+
             local TabboxButtons = Library:Create('Frame', {
                 BackgroundTransparency = 1;
                 Position = UDim2.new(0, 0, 0, 1);
@@ -3389,37 +3353,6 @@ function Library:CreateWindow(...)
 
                 Library:AddToRegistry(Button, {
                     BackgroundColor3 = 'MainColor';
-                });
-
-                -- Add tabbox glow stripe
-                local TabboxGlowStripe = Library:Create('Frame', {
-                    BackgroundColor3 = Library.AccentColor;
-                    BorderSizePixel = 0;
-                    Position = UDim2.new(0, 0, 0, 0);
-                    Size = UDim2.new(1, 0, 0, 2);
-                    ZIndex = 8;
-                    Visible = false;
-                    Parent = Button;
-                });
-
-                Library:AddToRegistry(TabboxGlowStripe, {
-                    BackgroundColor3 = 'AccentColor';
-                });
-
-                -- Add subtle glow line below the tabbox outline
-                local TabboxThickGlow = Library:Create('Frame', {
-                    BackgroundColor3 = Library.AccentColor;
-                    BackgroundTransparency = 0.8;
-                    BorderSizePixel = 0;
-                    Position = UDim2.new(0, 0, 1, -1); -- Position below the button
-                    Size = UDim2.new(1, 0, 0, 3); -- Smaller height, only below
-                    ZIndex = 5; -- Behind the button (ZIndex 6)
-                    Visible = false;
-                    Parent = Button;
-                });
-
-                Library:AddToRegistry(TabboxThickGlow, {
-                    BackgroundColor3 = 'AccentColor';
                 });
 
                 local ButtonLabel = Library:CreateLabel({
@@ -3471,22 +3404,6 @@ function Library:CreateWindow(...)
                     Button.BackgroundColor3 = Library.BackgroundColor;
                     Library.RegistryMap[Button].Properties.BackgroundColor3 = 'BackgroundColor';
 
-                    -- Show tabbox glow effects
-                    TabboxGlowStripe.Visible = true;
-                    TabboxThickGlow.Visible = true;
-                    TabboxGlowStripe.BackgroundTransparency = 1;
-                    TabboxThickGlow.BackgroundTransparency = 1;
-                    
-                    local tabboxAppearTween = TweenService:Create(TabboxGlowStripe, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        BackgroundTransparency = 0
-                    });
-                    local tabboxThickGlowTween = TweenService:Create(TabboxThickGlow, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        BackgroundTransparency = 0.8
-                    });
-                    
-                    tabboxAppearTween:Play();
-                    tabboxThickGlowTween:Play();
-
                     Tab:Resize();
                 end;
 
@@ -3496,22 +3413,6 @@ function Library:CreateWindow(...)
 
                     Button.BackgroundColor3 = Library.MainColor;
                     Library.RegistryMap[Button].Properties.BackgroundColor3 = 'MainColor';
-                    
-                    -- Hide tabbox glow effects
-                    local tabboxHideTween = TweenService:Create(TabboxGlowStripe, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        BackgroundTransparency = 1
-                    });
-                    local tabboxThickHideTween = TweenService:Create(TabboxThickGlow, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        BackgroundTransparency = 1
-                    });
-                    
-                    tabboxHideTween:Play();
-                    tabboxThickHideTween:Play();
-                    
-                    tabboxHideTween.Completed:Connect(function()
-                        TabboxGlowStripe.Visible = false;
-                        TabboxThickGlow.Visible = false;
-                    end);
                 end;
 
                 function Tab:Resize()
@@ -3733,4 +3634,3 @@ Players.PlayerRemoving:Connect(OnPlayerChange);
 
 getgenv().Library = Library
 return Library
-
