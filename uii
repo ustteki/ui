@@ -1184,7 +1184,19 @@ do
 
             Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
 
-            Library:UpdateKeybindFrameSize();
+            local YSize = 0
+            local XSize = 0
+
+            for _, Label in next, Library.KeybindContainer:GetChildren() do
+                if Label:IsA('TextLabel') and Label.Visible then
+                    YSize = YSize + 18;
+                    if (Label.TextBounds.X > XSize) then
+                        XSize = Label.TextBounds.X
+                    end
+                end;
+            end;
+
+            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
         end;
 
         function KeyPicker:GetState()
@@ -3296,78 +3308,11 @@ do
 
     Library.KeybindFrame = KeybindOuter;
     Library.KeybindContainer = KeybindContainer;
-    Library.CustomKeybinds = {}; -- Store custom keybinds from AddInput
     Library:MakeDraggable(KeybindOuter);
 end;
 
 function Library:SetWatermarkVisibility(Bool)
     Library.Watermark.Visible = Bool;
-end;
-
-function Library:AddCustomKeybind(Name, Key, Description, IsActive)
-    local CustomKeybind = {
-        Name = Name;
-        Key = Key;
-        Description = Description or Name;
-        IsActive = IsActive or false;
-    };
-
-    -- Create label for this keybind
-    local ContainerLabel = Library:CreateLabel({
-        TextXAlignment = Enum.TextXAlignment.Left;
-        Size = UDim2.new(1, 0, 0, 18);
-        TextSize = 9;
-        Visible = true;
-        ZIndex = 110;
-        Parent = Library.KeybindContainer;
-    }, true);
-
-    -- Update the label text and color
-    ContainerLabel.Text = string.format('[%s] %s', Key, Description);
-    ContainerLabel.TextColor3 = IsActive and Library.AccentColor or Library.FontColor;
-    Library.RegistryMap[ContainerLabel].Properties.TextColor3 = IsActive and 'AccentColor' or 'FontColor';
-
-    CustomKeybind.Label = ContainerLabel;
-    Library.CustomKeybinds[Name] = CustomKeybind;
-
-    -- Update keybind frame size
-    Library:UpdateKeybindFrameSize();
-
-    return CustomKeybind;
-end;
-
-function Library:UpdateCustomKeybind(Name, IsActive)
-    local Keybind = Library.CustomKeybinds[Name];
-    if Keybind then
-        Keybind.IsActive = IsActive;
-        Keybind.Label.TextColor3 = IsActive and Library.AccentColor or Library.FontColor;
-        Library.RegistryMap[Keybind.Label].Properties.TextColor3 = IsActive and 'AccentColor' or 'FontColor';
-    end;
-end;
-
-function Library:RemoveCustomKeybind(Name)
-    local Keybind = Library.CustomKeybinds[Name];
-    if Keybind then
-        Keybind.Label:Destroy();
-        Library.CustomKeybinds[Name] = nil;
-        Library:UpdateKeybindFrameSize();
-    end;
-end;
-
-function Library:UpdateKeybindFrameSize()
-    local YSize = 0;
-    local XSize = 0;
-
-    for _, Label in next, Library.KeybindContainer:GetChildren() do
-        if Label:IsA('TextLabel') and Label.Visible then
-            YSize = YSize + 18;
-            if (Label.TextBounds.X > XSize) then
-                XSize = Label.TextBounds.X;
-            end;
-        end;
-    end;
-
-    Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23);
 end;
 
 function Library:SetWatermark(Text)
