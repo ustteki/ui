@@ -3069,7 +3069,7 @@ function Library:CreateWindow(...)
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
             BorderColor3 = Library.OutlineColor;
-            Size = UDim2.new(0, TabButtonWidth + 8 + 4, 1, 0);
+            Size = UDim2.new(0, TabButtonWidth + 16 + 8, 1, 0); -- Increased from 8 + 4 to 16 + 8
             ZIndex = 1;
             Parent = TabArea;
         });
@@ -3094,32 +3094,20 @@ function Library:CreateWindow(...)
             BackgroundColor3 = 'AccentColor';
         });
 
-        -- Add thick glow line behind the stripe
+        -- Add subtle glow line behind the stripe (under the outline)
         local ThickGlow = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BackgroundTransparency = 0.8;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, -1, 0, -2);
-            Size = UDim2.new(1, 2, 0, 6);
-            ZIndex = 3;
+            Position = UDim2.new(0, 0, 0, -1);
+            Size = UDim2.new(1, 0, 0, 4);
+            ZIndex = 2; -- Behind the main button (ZIndex 1)
             Visible = false;
             Parent = TabButton;
         });
 
         Library:AddToRegistry(ThickGlow, {
             BackgroundColor3 = 'AccentColor';
-        });
-
-        -- Add UIStroke for additional glow effect
-        local GlowStroke = Library:Create('UIStroke', {
-            Color = Library.AccentColor;
-            Thickness = 2;
-            Transparency = 0.8;
-            Parent = ThickGlow;
-        });
-
-        Library:AddToRegistry(GlowStroke, {
-            Color = 'AccentColor';
         });
 
         local TabButtonLabel = Library:CreateLabel({
@@ -3211,7 +3199,7 @@ function Library:CreateWindow(...)
             TabButton.BackgroundColor3 = Library.MainColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
             
-            -- Animate glow stripe and thick glow appearance
+            -- Animate glow stripe and subtle glow appearance
             GlowStripe.Visible = true;
             ThickGlow.Visible = true;
             GlowStripe.BackgroundTransparency = 1;
@@ -3227,10 +3215,10 @@ function Library:CreateWindow(...)
             appearTween:Play();
             thickGlowTween:Play();
             
-            -- Create pulsing glow effect
+            -- Create subtle pulsing glow effect
             appearTween.Completed:Connect(function()
-                local pulseTween = TweenService:Create(GlowStroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-                    Transparency = 0.5
+                local pulseTween = TweenService:Create(ThickGlow, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+                    BackgroundTransparency = 0.6
                 });
                 pulseTween:Play();
                 Tab.PulseTween = pulseTween; -- Store reference to stop later
@@ -3462,32 +3450,20 @@ function Library:CreateWindow(...)
                     BackgroundColor3 = 'AccentColor';
                 });
 
-                -- Add thick glow line for tabbox
+                -- Add subtle glow line for tabbox (under the outline)
                 local TabboxThickGlow = Library:Create('Frame', {
                     BackgroundColor3 = Library.AccentColor;
                     BackgroundTransparency = 0.8;
                     BorderSizePixel = 0;
-                    Position = UDim2.new(0, -1, 0, -2);
-                    Size = UDim2.new(1, 2, 0, 6);
-                    ZIndex = 7;
+                    Position = UDim2.new(0, 0, 0, -1);
+                    Size = UDim2.new(1, 0, 0, 4);
+                    ZIndex = 5; -- Behind the button (ZIndex 6)
                     Visible = false;
                     Parent = Button;
                 });
 
                 Library:AddToRegistry(TabboxThickGlow, {
                     BackgroundColor3 = 'AccentColor';
-                });
-
-                -- Add UIStroke for tabbox glow effect
-                local TabboxGlowStroke = Library:Create('UIStroke', {
-                    Color = Library.AccentColor;
-                    Thickness = 2;
-                    Transparency = 0.8;
-                    Parent = TabboxThickGlow;
-                });
-
-                Library:AddToRegistry(TabboxGlowStroke, {
-                    Color = 'AccentColor';
                 });
 
                 local ButtonLabel = Library:CreateLabel({
