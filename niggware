@@ -35,6 +35,7 @@ local Library = {
     AccentColor = Color3.fromRGB(0, 85, 255);
     OutlineColor = Color3.fromRGB(50, 50, 50);
     RiskColor = Color3.fromRGB(255, 50, 50),
+    GroupboxOutlineColor = Color3.fromRGB(40, 80, 80); -- Faint cyan outline
 
     Black = Color3.new(0, 0, 0);
     Font = Enum.Font.Code,
@@ -3042,7 +3043,7 @@ function Library:CreateWindow(...)
             BorderColor3 = 'OutlineColor';
         });
 
-        -- Add glowing stripe outline over the tab button
+        -- Add glowing stripe outline over the tab button (top)
         local GlowStripe = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
@@ -3057,13 +3058,13 @@ function Library:CreateWindow(...)
             BackgroundColor3 = 'AccentColor';
         });
 
-        -- Add subtle glow line below the outline
+        -- Add subtle glow line below the tab button and its border
         local ThickGlow = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BackgroundTransparency = 0.8;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 1, -1); -- Position below the button
-            Size = UDim2.new(1, 0, 0, 3); -- Smaller height, only below
+            Position = UDim2.new(0, 0, 1, 0); -- Position right below the button border
+            Size = UDim2.new(1, 0, 0, 6); -- Taller glow effect
             ZIndex = 2; -- Behind the main button (ZIndex 1)
             Visible = false;
             Parent = TabButton;
@@ -3231,7 +3232,7 @@ function Library:CreateWindow(...)
 
             local BoxOuter = Library:Create('Frame', {
                 BackgroundColor3 = Library.BackgroundColor;
-                BorderColor3 = Library.OutlineColor;
+                BorderColor3 = Library.GroupboxOutlineColor;
                 BorderMode = Enum.BorderMode.Inset;
                 Size = UDim2.new(1, 0, 0, 507 + 2);
                 ZIndex = 2;
@@ -3240,7 +3241,22 @@ function Library:CreateWindow(...)
 
             Library:AddToRegistry(BoxOuter, {
                 BackgroundColor3 = 'BackgroundColor';
-                BorderColor3 = 'OutlineColor';
+                BorderColor3 = 'GroupboxOutlineColor';
+            });
+
+            -- Add subtle glow line below the groupbox border
+            local GroupboxGlow = Library:Create('Frame', {
+                BackgroundColor3 = Library.GroupboxOutlineColor;
+                BackgroundTransparency = 0.5;
+                BorderSizePixel = 0;
+                Position = UDim2.new(0, 0, 1, 0); -- Position right below the border
+                Size = UDim2.new(1, 0, 0, 6); -- Taller glow effect
+                ZIndex = 1; -- Behind the main box
+                Parent = BoxOuter;
+            });
+
+            Library:AddToRegistry(GroupboxGlow, {
+                BackgroundColor3 = 'GroupboxOutlineColor';
             });
 
             local BoxInner = Library:Create('Frame', {
