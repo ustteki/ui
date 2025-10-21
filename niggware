@@ -3094,13 +3094,13 @@ function Library:CreateWindow(...)
             BackgroundColor3 = 'AccentColor';
         });
 
-        -- Add subtle glow line behind the stripe (under the outline)
+        -- Add subtle glow line below the outline
         local ThickGlow = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BackgroundTransparency = 0.8;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 0, -1);
-            Size = UDim2.new(1, 0, 0, 4);
+            Position = UDim2.new(0, 0, 1, -1); -- Position below the button
+            Size = UDim2.new(1, 0, 0, 3); -- Smaller height, only below
             ZIndex = 2; -- Behind the main button (ZIndex 1)
             Visible = false;
             Parent = TabButton;
@@ -3114,6 +3114,7 @@ function Library:CreateWindow(...)
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, -1);
             Text = Name;
+            TextXAlignment = Enum.TextXAlignment.Center; -- Center the text
             ZIndex = 1;
             Parent = TabButton;
         });
@@ -3450,13 +3451,13 @@ function Library:CreateWindow(...)
                     BackgroundColor3 = 'AccentColor';
                 });
 
-                -- Add subtle glow line for tabbox (under the outline)
+                -- Add subtle glow line below the tabbox outline
                 local TabboxThickGlow = Library:Create('Frame', {
                     BackgroundColor3 = Library.AccentColor;
                     BackgroundTransparency = 0.8;
                     BorderSizePixel = 0;
-                    Position = UDim2.new(0, 0, 0, -1);
-                    Size = UDim2.new(1, 0, 0, 4);
+                    Position = UDim2.new(0, 0, 1, -1); -- Position below the button
+                    Size = UDim2.new(1, 0, 0, 3); -- Smaller height, only below
                     ZIndex = 5; -- Behind the button (ZIndex 6)
                     Visible = false;
                     Parent = Button;
