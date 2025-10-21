@@ -30,8 +30,8 @@ local Library = {
     HudRegistry = {};
 
     FontColor = Color3.fromRGB(255, 255, 255);
-    MainColor = Color3.fromRGB(28, 28, 28);
-    BackgroundColor = Color3.fromRGB(20, 20, 20);
+    MainColor = Color3.fromRGB(39, 39, 39);
+    BackgroundColor = Color3.fromRGB(39, 39, 39);
     AccentColor = Color3.fromRGB(0, 85, 255);
     OutlineColor = Color3.fromRGB(50, 50, 50);
     RiskColor = Color3.fromRGB(255, 50, 50),
@@ -2974,24 +2974,22 @@ function Library:CreateWindow(...)
 
     local Inner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.AccentColor;
-        BorderMode = Enum.BorderMode.Inset;
-        Position = UDim2.new(0, 1, 0, 1);
-        Size = UDim2.new(1, -2, 1, -2);
+        BorderSizePixel = 0; -- Remove the outline
+        Position = UDim2.new(0, 0, 0, 0);
+        Size = UDim2.new(1, 0, 1, 0);
         ZIndex = 1;
         Parent = Outer;
     });
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = 'MainColor';
-        BorderColor3 = 'AccentColor';
     });
 
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 7, 0, 0);
-        Size = UDim2.new(0, 0, 0, 25);
+        Position = UDim2.new(0, 0, 0, 0);
+        Size = UDim2.new(1, 0, 0, 25);
         Text = Config.Title or '';
-        TextXAlignment = Enum.TextXAlignment.Left;
+        TextXAlignment = Enum.TextXAlignment.Center; -- Force centered
         ZIndex = 1;
         Parent = Inner;
     });
