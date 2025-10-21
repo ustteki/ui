@@ -63,13 +63,26 @@ local MP3Player = {
 function MP3Player:Initialize()
     -- Create script folder if it doesn't exist
     local success, scriptPath = pcall(function()
-        return debug.getinfo(2, "S").source:sub(2)
+        local info = debug.getinfo(2, "S")
+        if info and info.source then
+            return info.source:sub(2)
+        end
+        return nil
     end)
     
-    if success then
-        self.ScriptFolder = scriptPath:match("(.+[\\/])")
-        if not isfolder(self.ScriptFolder .. "mp3_cache") then
-            makefolder(self.ScriptFolder .. "mp3_cache")
+    if success and scriptPath then
+        local folderPath = scriptPath:match("(.+[\\/])")
+        if folderPath then
+            self.ScriptFolder = folderPath
+            if not isfolder(self.ScriptFolder .. "mp3_cache") then
+                makefolder(self.ScriptFolder .. "mp3_cache")
+            end
+        else
+            -- Fallback folder
+            if not isfolder("mp3_cache") then
+                makefolder("mp3_cache")
+            end
+            self.ScriptFolder = ""
         end
     else
         -- Fallback folder
@@ -85,11 +98,26 @@ function MP3Player:DownloadMP3(url, filename, callback)
         return game:HttpGet(url)
     end)
     
-    if success then
-        local filepath = (self.ScriptFolder or "") .. "mp3_cache/" .. filename .. ".mp3"
-        writefile(filepath, response)
-        if callback then callback(true, filepath) end
-        return true, filepath
+    if success and response then
+        local folderPath = (self.ScriptFolder or "") .. "mp3_cache/"
+        local filepath = folderPath .. filename .. ".mp3"
+        
+        -- Ensure the folder exists before writing
+        if not isfolder(folderPath:sub(1, -2)) then
+            makefolder(folderPath:sub(1, -2))
+        end
+        
+        local writeSuccess = pcall(function()
+            writefile(filepath, response)
+        end)
+        
+        if writeSuccess then
+            if callback then callback(true, filepath) end
+            return true, filepath
+        else
+            if callback then callback(false, "Failed to save file") end
+            return false, "Failed to save file"
+        end
     else
         if callback then callback(false, "Download failed: " .. tostring(response)) end
         return false, "Download failed"
@@ -99,20 +127,38 @@ end
 function MP3Player:PlaySound(filepath)
     self:StopSound()
     
-    local sound = Instance.new("Sound")
-    sound.SoundId = "rbxasset://" .. filepath
-    sound.Volume = self.Volume
-    sound.Parent = SoundService
+    if not filepath or filepath == "" then
+        return nil
+    end
     
-    sound.Ended:Connect(function()
-        self:NextSong()
+    local success, sound = pcall(function()
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxasset://" .. filepath
+        sound.Volume = self.Volume
+        sound.Parent = SoundService
+        return sound
     end)
     
-    sound:Play()
-    self.CurrentSound = sound
-    self.IsPlaying = true
-    
-    return sound
+    if success and sound then
+        sound.Ended:Connect(function()
+            self:NextSong()
+        end)
+        
+        local playSuccess = pcall(function()
+            sound:Play()
+        end)
+        
+        if playSuccess then
+            self.CurrentSound = sound
+            self.IsPlaying = true
+            return sound
+        else
+            sound:Destroy()
+            return nil
+        end
+    else
+        return nil
+    end
 end
 
 function MP3Player:StopSound()
@@ -172,6 +218,10 @@ function MP3Player:PreviousSong()
 end
 
 function MP3Player:AddSongToPlaylist(name, url)
+    if not name or not url or name == "" or url == "" then
+        return nil
+    end
+    
     local song = {
         name = name,
         url = url,
@@ -182,11 +232,13 @@ function MP3Player:AddSongToPlaylist(name, url)
     table.insert(self.PlaylistSongs, song)
     
     -- Download the song
-    self:DownloadMP3(url, name, function(success, filepath)
-        if success then
-            song.filepath = filepath
-            song.downloaded = true
-        end
+    task.spawn(function()
+        self:DownloadMP3(url, name, function(success, filepath)
+            if success then
+                song.filepath = filepath
+                song.downloaded = true
+            end
+        end)
     end)
     
     return song
